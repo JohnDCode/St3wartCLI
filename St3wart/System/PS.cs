@@ -112,12 +112,12 @@ public class PowerShellInstance : IDisposable {
 
 
     /// <summary>
-    /// Execute a single command within the Powershell instance
+    /// Execute a single command within the Powershell instance and checks for the appropriate vuln finding
     /// </summary>
-    /// <param name="command">The Powershell cmd to execute</param>
+    /// <param name="check">The Powershell check to execute</param>
     /// <param name="timeoutMs">The timeout (in ms) allotted for the command to run</param>
     /// <returns>
-    /// The output and details of the command as a PowershellResult object
+    /// The output and details of the check as a PowershellResult object
     /// </returns>
     public async Task<PowerShellResult> ExecuteCommandAsync(PowerShellCheck check, int timeoutMs = 30000) {
 
@@ -140,11 +140,9 @@ public class PowerShellInstance : IDisposable {
             var output = new StringBuilder();
             var errors = new List<string>();
 
-            try
-            {
+            try {
                 // Read output until cancellation object cancels operation
-                while (!cts.Token.IsCancellationRequested)
-                {
+                while (!cts.Token.IsCancellationRequested) {
 
                     // Read the next line
                     var line = await ReadLineWithTimeoutAsync(_outputReader, cts.Token, false);
@@ -158,8 +156,7 @@ public class PowerShellInstance : IDisposable {
                 }
 
                 // Read error stream until cancellation object cancels operation OR we reach 5 error lines (to save resources)
-                for (int i = 0; i < 5 && !cts.Token.IsCancellationRequested; i++)
-                {
+                for (int i = 0; i < 5 && !cts.Token.IsCancellationRequested; i++) {
 
                     // Read the next line
                     var line = await ReadLineWithTimeoutAsync(_errorReader, cts.Token, true);
@@ -172,7 +169,7 @@ public class PowerShellInstance : IDisposable {
                     errors.Add(line);
                 }
 
-                // Test the check pass based on the specific operator 
+                // Test the check pass based on the specific operator and PowerShell output
                 bool checkPass = false;
                 switch (check.Operator) {
                     case "GreaterThan": 
@@ -192,9 +189,8 @@ public class PowerShellInstance : IDisposable {
                 }
 
 
-                // Construct a struct to hold all relevant info of the command and return
-                return new PowerShellResult
-                {
+                // Construct a struct to hold all relevant info of the check and return
+                return new PowerShellResult {
                     Output = output.ToString().TrimEnd('\r', '\n'),
                     Errors = errors,
                     Success = errors.Count == 0,
@@ -268,16 +264,14 @@ public class PowerShellInstance : IDisposable {
     /// <summary>
     /// Free the resources from the process and kill the process
     /// </summary>
-    public void Dispose()
-    {
+    public void Dispose() {
 
         // If already disposed no need to modify any resources
         if (_disposed) return;
         _disposed = true;
 
         // Attempt to run the exit command to powershell instance
-        try
-        {
+        try {
             _inputWriter?.WriteLine("exit");
             _inputWriter?.Flush();
             _process?.WaitForExit(2000);
@@ -299,45 +293,12 @@ public class PowerShellInstance : IDisposable {
 
 
 /// <summary>
-/// Handles information for the result of a single Powershell command
-/// </summary>
-public class PowerShellResult
-{
-    /// <summary>
-    /// The output of the command
-    /// </summary>
-    public string Output { get; set; } = string.Empty;
-
-    /// <summary>
-    /// The error output of the command
-    /// </summary>
-    public List<string> Errors { get; set; } = new();
-
-    /// <summary>
-    /// The success state of the command
-    /// </summary>
-    public bool Success { get; set; }
-
-    /// <summary>
-    /// The state if the command timed out (execution did not complete)
-    /// </summary>
-    public bool TimedOut { get; set; }
-
-    /// <summary>
-    /// The success of the check
-    /// </summary>
-    public bool CheckPass { get; set; }
-}
-
-
-
-/// <summary>
-/// Pool to handle multiple Powershell instances and releasing commands to each concurrently via a Semaphore Slim
+/// Pool to handle multiple Powershell instances and releasing commands and checks to each concurrently via a Semaphore Slim
 /// </summary>
 public class PowerShellPool : IDisposable {
 
     /// <summary>
-    /// The queue of processes / Powershell instances to release commands to
+    /// The queue of processes / Powershell instances to release commands/checks to
     /// </summary>
     private readonly ConcurrentQueue<PowerShellInstance> _availableInstances = new();
 
@@ -434,8 +395,7 @@ public class PowerShellPool : IDisposable {
         var success = await instance.InitializeAsync();
 
         // If the process did not spawn properly, release the resources and do not return any instance object
-        if (!success)
-        {
+        if (!success) {
             instance.Dispose();
             return null;
         }
@@ -542,8 +502,7 @@ public class PowerShellPool : IDisposable {
 /// <summary>
 /// Holds information on a single vuln whos presence can be checked with Powershell
 /// </summary>
-public class PowerShellCheck
-{
+public class PowerShellCheck {
 
     /// <summary>
     /// The ID of the vuln to check
@@ -567,4 +526,36 @@ public class PowerShellCheck
     /// Options for operators are: GreaterThan (numerical data), LessThan (numerical data), EqualTo (numerical or textual data), Contains (numerical or textual data)
     /// </regards>
     public required string Operator{ get; set; }
+}
+
+
+
+/// <summary>
+/// Handles information for the result of a single Powershell check
+/// </summary>
+public class PowerShellResult {
+    /// <summary>
+    /// The output of the command
+    /// </summary>
+    public string Output { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The error output of the command
+    /// </summary>
+    public List<string> Errors { get; set; } = new();
+
+    /// <summary>
+    /// The success state of the command
+    /// </summary>
+    public bool Success { get; set; }
+
+    /// <summary>
+    /// The state if the command timed out (execution did not complete)
+    /// </summary>
+    public bool TimedOut { get; set; }
+
+    /// <summary>
+    /// The success of the check
+    /// </summary>
+    public bool CheckPass { get; set; }
 }

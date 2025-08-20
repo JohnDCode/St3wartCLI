@@ -184,6 +184,12 @@ public class PowerShellInstance : IDisposable {
                     case "Contains":
                         checkPass = !output.ToString().TrimEnd('\r', '\n').Contains(check.FindData);
                         break;
+                    case "NotEqualTo":
+                        checkPass = int.Parse(output.ToString().TrimEnd('\r', '\n')) == int.Parse(check.FindData) || output.ToString().TrimEnd('\r', '\n') == check.FindData;
+                        break;
+                    case "NotContains":
+                        checkPass = output.ToString().TrimEnd('\r', '\n').Contains(check.FindData);
+                        break;
                     default:
                         break;
                 }
@@ -191,6 +197,7 @@ public class PowerShellInstance : IDisposable {
 
                 // Construct a struct to hold all relevant info of the check and return
                 return new PowerShellResult {
+                    Check = check,
                     Output = output.ToString().TrimEnd('\r', '\n'),
                     Errors = errors,
                     Success = errors.Count == 0,
@@ -202,6 +209,7 @@ public class PowerShellInstance : IDisposable {
             // If  the cancellation object requested early exit, log the timeout
             catch (OperationCanceledException) {
                 return new PowerShellResult {
+                    Check = check,
                     Output = output.ToString(),
                     Errors = new List<string> { "Command timed out" },
                     Success = false,
@@ -502,12 +510,18 @@ public class PowerShellPool : IDisposable {
 /// <summary>
 /// Holds information on a single vuln whos presence can be checked with Powershell
 /// </summary>
-public class PowerShellCheck {
+public class PowerShellCheck
+{
 
     /// <summary>
     /// The ID of the vuln to check
     /// </summary>
     public required string ID { get; set; }
+
+    /// <summary>
+    /// A description of the vuln to check
+    /// </summary>
+    public required string Description { get; set; }
 
     /// <summary>
     /// The command to check the vuln's state
@@ -518,14 +532,19 @@ public class PowerShellCheck {
     /// The regex, if which is matched to the output of the CheckCommand, marks the vuln as found
     /// </summary>
     public required string FindData { get; set; }
-    
+
     /// <summary>
     /// The operator to perform on the data with the output of the command to get a finding
     /// </summary>
     /// <regards>
-    /// Options for operators are: GreaterThan (numerical data), LessThan (numerical data), EqualTo (numerical or textual data), Contains (numerical or textual data)
+    /// Options for operators are: GreaterThan (numerical data), LessThan (numerical data), EqualTo (numerical or textual data), Contains (numerical or textual data), NotEqualTo (numerical or textual data), NotContains (numerical or textual data)
     /// </regards>
-    public required string Operator{ get; set; }
+    public required string Operator { get; set; }
+    
+    /// <summary>
+    /// The command to secure the vuln on the system
+    /// </summary>
+    public required string SecureCommand { get; set; }
 }
 
 
@@ -534,28 +553,34 @@ public class PowerShellCheck {
 /// Handles information for the result of a single Powershell check
 /// </summary>
 public class PowerShellResult {
+
+    /// <summary>
+    /// The check which this result object contains data on the success of
+    /// </summary>
+    public required PowerShellCheck Check { get; set; }
+
     /// <summary>
     /// The output of the command
     /// </summary>
-    public string Output { get; set; } = string.Empty;
+    public required string Output { get; set; } = string.Empty;
 
     /// <summary>
     /// The error output of the command
     /// </summary>
-    public List<string> Errors { get; set; } = new();
+    public required List<string> Errors { get; set; } = new();
 
     /// <summary>
     /// The success state of the command
     /// </summary>
-    public bool Success { get; set; }
+    public required bool Success { get; set; }
 
     /// <summary>
     /// The state if the command timed out (execution did not complete)
     /// </summary>
-    public bool TimedOut { get; set; }
+    public required bool TimedOut { get; set; }
 
     /// <summary>
     /// The success of the check
     /// </summary>
-    public bool CheckPass { get; set; }
+    public required bool CheckPass { get; set; }
 }

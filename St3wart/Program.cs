@@ -17,8 +17,3 @@ class Program
         router.Route(args);
     }
 }
-
-
-
-// Need to add not operators
-// Need to change the check and result objects to contain all the required JSON data

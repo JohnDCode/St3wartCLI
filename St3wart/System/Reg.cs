@@ -27,8 +27,10 @@ public class RegistryRunner {
         
         // Define a blank result object to return if check does not complete
         RegistryResult result = new RegistryResult {
+            Check = check,
             Data = "",
-            CheckPass = false
+            CheckPass = false,
+            Success = false
         };
         
         try {
@@ -82,6 +84,12 @@ public class RegistryRunner {
                 case "Contains":
                     checkPass = !value.ToString().TrimEnd('\r', '\n').Contains(check.FindData);
                     break;
+                case "NotEqualTo":
+                    checkPass = int.Parse(value.ToString().TrimEnd('\r', '\n')) == int.Parse(check.FindData) || value.ToString().TrimEnd('\r', '\n') == check.FindData;
+                    break;
+                case "NotContains":
+                    checkPass = value.ToString().TrimEnd('\r', '\n').Contains(check.FindData);
+                    break;
                 default:
                     break;
             }
@@ -89,8 +97,10 @@ public class RegistryRunner {
 
             // Construct a struct to hold all relevant info of the command and return
             return new RegistryResult {
+                Check = check,
                 Data = value.ToString(),
-                CheckPass = checkPass
+                CheckPass = checkPass,
+                Success = true
             };
 
         }
@@ -120,23 +130,6 @@ public class RegistryRunner {
 
 
 /// <summary>
-/// Handles information for the result of a single Powershell check
-/// </summary>
-public class RegistryResult {
-    /// <summary>
-    /// The data from the registry value
-    /// </summary>
-    public string Data { get; set; } = string.Empty;
-
-    /// <summary>
-    /// The success of the check
-    /// </summary>
-    public bool CheckPass { get; set; }
-}
-
-
-
-/// <summary>
 ///  Handles information for the result of a single Powershell check
 /// </summary>
 public class RegistryCheck {
@@ -145,6 +138,11 @@ public class RegistryCheck {
     /// The ID of the vuln to check
     /// </summary>
     public required string ID { get; set; }
+
+    /// <summary>
+    /// A description of the vuln to check
+    /// </summary>
+    public required string Description { get; set; }
 
     /// <summary>
     /// The key to check within the registry
@@ -165,7 +163,41 @@ public class RegistryCheck {
     /// The operator to perform on the data with the output of the command to get a finding
     /// </summary>
     /// <regards>
-    /// Options for operators are: GreaterThan (numerical data), LessThan (numerical data), EqualTo (numerical or textual data), Contains (numerical or textual data)
+    /// // Options for operators are: GreaterThan (numerical data), LessThan (numerical data), EqualTo (numerical or textual data), Contains (numerical or textual data), NotEqualTo (numerical or textual data), NotContains (numerical or textual data)
     /// </regards>
     public required string Operator { get; set; }
+    
+    /// <summary>
+    /// The value to set within the specific registry key to secure the vuln
+    /// </summary>
+    public required string SecureValue { get; set; }
+}
+
+
+
+/// <summary>
+/// Handles information for the result of a single Powershell check
+/// </summary>
+public class RegistryResult
+{
+
+    /// <summary>
+    /// The check which this result object contains data on the success of
+    /// </summary>
+    public required RegistryCheck Check { get; set; }
+
+    /// <summary>
+    /// The data from the registry value
+    /// </summary>
+    public required string Data { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The success of the check
+    /// </summary>
+    public required bool CheckPass { get; set; }
+    
+    /// <summary>
+    /// The success state of the registry request
+    /// </summary>
+    public required bool Success { get; set; }
 }

@@ -510,41 +510,17 @@ public class PowerShellPool : IDisposable {
 /// <summary>
 /// Holds information on a single vuln whos presence can be checked with Powershell
 /// </summary>
-public class PowerShellCheck
-{
-
-    /// <summary>
-    /// The ID of the vuln to check
-    /// </summary>
-    public required string ID { get; set; }
-
-    /// <summary>
-    /// A description of the vuln to check
-    /// </summary>
-    public required string Description { get; set; }
+public class PowerShellCheck : Check {
 
     /// <summary>
     /// The command to check the vuln's state
     /// </summary>
-    public required string CheckCommand { get; set; }
-
-    /// <summary>
-    /// The regex, if which is matched to the output of the CheckCommand, marks the vuln as found
-    /// </summary>
-    public required string FindData { get; set; }
-
-    /// <summary>
-    /// The operator to perform on the data with the output of the command to get a finding
-    /// </summary>
-    /// <regards>
-    /// Options for operators are: GreaterThan (numerical data), LessThan (numerical data), EqualTo (numerical or textual data), Contains (numerical or textual data), NotEqualTo (numerical or textual data), NotContains (numerical or textual data)
-    /// </regards>
-    public required string Operator { get; set; }
+    public string CheckCommand { get; set; }
     
     /// <summary>
     /// The command to secure the vuln on the system
     /// </summary>
-    public required string SecureCommand { get; set; }
+    public string SecureCommand { get; set; }
 }
 
 

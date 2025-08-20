@@ -16,7 +16,7 @@ using Microsoft.Win32;
 /// <summary>
 /// Used to execute batch checks to the Windows registry
 /// </summary>
-public class RegistryRunner {
+public static class RegistryRunner {
 
     /// <summary>
     /// Executes a single Registry check and returns the result of the finding / check
@@ -132,45 +132,22 @@ public class RegistryRunner {
 /// <summary>
 ///  Handles information for the result of a single Powershell check
 /// </summary>
-public class RegistryCheck {
-
-    /// <summary>
-    /// The ID of the vuln to check
-    /// </summary>
-    public required string ID { get; set; }
-
-    /// <summary>
-    /// A description of the vuln to check
-    /// </summary>
-    public required string Description { get; set; }
+public class RegistryCheck : Check {
 
     /// <summary>
     /// The key to check within the registry
     /// </summary>
-    public required string Key { get; set; }
+    public string Key { get; set; }
 
     /// <summary>
     /// The value to check within the specific registry key
     /// </summary>
-    public required string Value { get; set; }
-
-    /// <summary>
-    /// The data which if identified within the key/value pair, indicates a finding
-    /// </summary>
-    public required string FindData { get; set; }
-
-    /// <summary>
-    /// The operator to perform on the data with the output of the command to get a finding
-    /// </summary>
-    /// <regards>
-    /// // Options for operators are: GreaterThan (numerical data), LessThan (numerical data), EqualTo (numerical or textual data), Contains (numerical or textual data), NotEqualTo (numerical or textual data), NotContains (numerical or textual data)
-    /// </regards>
-    public required string Operator { get; set; }
+    public string Value { get; set; }
     
     /// <summary>
     /// The value to set within the specific registry key to secure the vuln
     /// </summary>
-    public required string SecureValue { get; set; }
+    public string SecureValue { get; set; }
 }
 
 

@@ -16,7 +16,7 @@ using Newtonsoft.Json.Linq;
 
 public static class DataHandler
 {
-    public static List<Check> VulnsFromFile(string filePath)
+    public static Dictionary<string, Check> VulnsFromFile(string filePath)
     {
         string jsonFromFile = File.ReadAllText(filePath);
 
@@ -25,7 +25,15 @@ public static class DataHandler
             Converters = { new CheckConverter() }
         };
 
-        return JsonConvert.DeserializeObject<List<Check>>(jsonFromFile, settings);
+        var checks = JsonConvert.DeserializeObject<List<Check>>(jsonFromFile, settings);
+
+        var dict = new Dictionary<string, Check>();
+        foreach (var check in checks)
+        {
+            dict[check.ID] = check;
+        }
+
+        return dict;
     }
 
     private class CheckConverter : JsonConverter

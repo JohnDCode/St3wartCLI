@@ -148,6 +148,10 @@ public class RegistryCheck : Check {
     /// The value to set within the specific registry key to secure the vuln
     /// </summary>
     public string SecureValue { get; set; }
+        
+    public string Print() {
+        return $"Vuln: {this.ID}\nDescription: {this.Description}\nKey: {this.Key}\nValue: {this.Value}\nFind Data: {this.FindData}\nSecure Value: {this.SecureValue}\nOperator: {this.Operator}";
+    }
 }
 
 

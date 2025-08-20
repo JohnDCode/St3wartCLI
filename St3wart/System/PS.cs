@@ -521,6 +521,10 @@ public class PowerShellCheck : Check {
     /// The command to secure the vuln on the system
     /// </summary>
     public string SecureCommand { get; set; }
+    
+    public string Print() {
+        return $"Vuln: {this.ID}\nDescription: {this.Description}\nCheck Command: {this.CheckCommand}\nSecure Command: {this.SecureCommand}\nFind Data: {this.FindData}\nOperator: {this.Operator}";
+    }
 }
 
 

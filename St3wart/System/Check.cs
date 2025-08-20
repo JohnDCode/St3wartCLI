@@ -32,4 +32,9 @@ public class Check {
     /// Options for operators are: GreaterThan (numerical data), LessThan (numerical data), EqualTo (numerical or textual data), Contains (numerical or textual data), NotEqualTo (numerical or textual data), NotContains (numerical or textual data)
     /// </regards>
     public string Operator { get; set; }
+
+
+    public string Print() {
+        return $"Vuln: {this.ID}\nDescription: {this.Description}";
+    }
 }

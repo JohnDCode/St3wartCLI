@@ -17,7 +17,7 @@ public class Router
         {
             // If no command has been called, print info and display help command
             ICommand helpCmd = new HelpCommand();
-            helpCmd.Execute();
+            helpCmd.Execute(args);
             return;
         }
 
@@ -48,6 +48,6 @@ public class Router
         }
 
         // Execute the delegated command
-        cmd.Execute();
+        cmd.Execute(args);
     }
 }

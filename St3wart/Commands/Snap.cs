@@ -11,7 +11,7 @@ JohnDavid Abe
 public class SnapCommand : ICommand
 {
     // Execute method (ran upon command)
-    public void Execute()
+    public void Execute(string[] args)
     {
         // Debug console out
         Console.Write("Running Snap Command");

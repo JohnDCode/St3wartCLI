@@ -11,7 +11,7 @@ JohnDavid Abe
 public class SecureCommand : ICommand
 {
     // Execute method (ran upon command)
-    public void Execute()
+    public void Execute(string[] args)
     {
         // Debug console out
         Console.Write("Running Secure Command");

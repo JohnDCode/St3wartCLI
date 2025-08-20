@@ -1,0 +1,26 @@
+[
+  {
+    "Id": "OS-001",
+    "Description": "SMBv1 protocol is enabled",
+    "CheckType": "PowerShell",
+    "Check": {
+        "CheckCommand": "Get-WindowsOptionalFeature -Online -FeatureName SMB1Protocol | Select-Object -ExpandProperty State",
+        "FindData": "Enabled",
+        "Operator": "Contains",
+        "SecureCommand": "Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol"
+    }
+  },
+
+  {
+    "Id": "OS-002",
+    "Description": "Guest account is enabled",
+    "CheckType": "Registry",
+    "Check": {
+        "Key": "HKEY_LOCAL_MACHINE\SAM\SAM\Domains\Account\Users\000001F5",
+        "Value": "F",
+        "FindData": "0",
+        "Operator": "Contains",
+        "SecureValue": "0"
+    }
+  }
+]

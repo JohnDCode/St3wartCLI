@@ -13,5 +13,5 @@ JohnDavid Abe
 /// </summary> 
 public interface ICommand {
     void Execute(string[] args);
-    //void Help();
+    void Help();
 }

@@ -21,3 +21,4 @@ class Program
 
 
 // Erorr handeling, comments, restructuring, consistency, etc. due tonight for all program files
+// Implement help for commands due tonight as well and error handling for the commands to then point to those help methods

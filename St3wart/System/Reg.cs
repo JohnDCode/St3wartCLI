@@ -130,7 +130,7 @@ public static class RegistryRunner {
 
 
 /// <summary>
-///  Handles information for the result of a single Powershell check
+///  Holds information on a single vuln whos presence can be checked with the Registry
 /// </summary>
 public class RegistryCheck : Check {
 

@@ -12,31 +12,59 @@ JohnDavid Abe
 using System.Xml.Linq;
 
 
-public class ExemptCommand : ICommand
-{
-    // Execute method (ran upon command)
-    public void Execute(string[] args)
-    {
-        
-        Console.WriteLine("HERE 1");
-        // Check if configuration file has been created and create it if not
+
+/// <summary>
+/// Exempt command, exempts vulns from being checked, secured, or otherwise noted by St3wart
+/// </summary>
+public class ExemptCommand : ICommand {
+
+    /// <summary>
+    /// Method run on execution of the command
+    /// </summary>
+    /// <param name="args">CLI arguments for the command</param>
+    public void Execute(string[] args) {
+
+        // Check if the configuration file has been created and create one if not
         string filePath = Directory.GetCurrentDirectory() + "/config.xml";
         if (!File.Exists(filePath)) { Config.CreateConfig(filePath); }
 
-        Console.WriteLine("HERE 2");
+        // Ensure the file was created / does exist
+        if (!File.Exists(filePath)) { Errors.PrintError("Can not create configuration file"); return; }
 
+        // Create the exception element corresponding to the exempt request
+        XElement e;
+        try {
+            e = new XElement("exemption", new XAttribute("ID", args[2]));
+        } catch (IndexOutOfRangeException) {
+            Help(); return;
+        }
 
-        XElement e = new XElement("exemption", new XAttribute("ID", args[2]));
+        // Get the action to perform on the provided exception
+        string action;
+        try {
+            action = args[1].ToLower();
+        } catch (IndexOutOfRangeException) {
+            Help(); return;
+        }
 
-        if (args[1].ToLower() == "add")
-        {
+        // Add or remove the exemption according to the command arguments
+        if (action == "add") {
             Config.WriteElement(filePath, "exemptions", e);
-        }
-        else if (args[1].ToLower() == "remove")
-        {
+        } else if (action == "remove") {
             Config.RemoveElement(filePath, "exemptions", e);
+        } else {
+            Help();
         }
-
-
+    }
+    
+    /// <summary>
+    /// Displays help information on the command
+    /// </summary>
+    public void Help() {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("St3wart Excempt");
+        Console.WriteLine("Usage: St3wart.exe exempt [OPTIONS] <ACTION> <VULN ID>");
+        Console.WriteLine("Example: St3wart.exe exempt add OS-001");
+        Console.ResetColor();
     }
 }

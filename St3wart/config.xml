@@ -1,4 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <config>
-  <exemptions />
+  <exemptions>
+    <exemption ID="001" />
+  </exemptions>
 </config>

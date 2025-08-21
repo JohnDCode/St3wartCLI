@@ -8,17 +8,18 @@ JohnDavid Abe
 
 
 
-class Program
-{
-    static void Main(string[] args)
-    {
-        // Route arguments from command to the router
+/// <summary>
+/// Entry point for executable
+/// </summary>
+class Program {
+    
+    /// <summary>
+    /// Entry point for executable
+    /// </summary>
+    /// <param name="args">CLI arguments for the command</param>
+    static void Main(string[] args) {
+        // Call router to route commands with CLI arguments
         var router = new Router();
         router.Route(args);
     }
 }
-
-
-
-// Erorr handeling, comments, restructuring, consistency, etc. due tonight for all program files
-// Implement help for commands due tonight as well and error handling for the commands to then point to those help methods

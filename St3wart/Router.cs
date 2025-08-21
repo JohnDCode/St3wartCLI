@@ -8,13 +8,19 @@ JohnDavid Abe
 
 
 
-public class Router
-{
-    public void Route(string[] args)
-    {
+/// <summary>
+/// Delegates commands to the appropriate classes
+/// </summary>
+public class Router {
+
+    /// <summary>
+    /// Delegates commands to the appropriate classes
+    /// </summary>
+    /// <param name="args">CLI arguments for the command</param>
+    public void Route(string[] args) {
+
         // Check that a command has been called
-        if (args.Length == 0)
-        {
+        if (args.Length == 0) {
             // If no command has been called, print info and display help command
             ICommand helpCmd = new HelpCommand();
             helpCmd.Execute(args);
@@ -25,8 +31,7 @@ public class Router
         string command = args[0].ToLower();
 
         // Get the command (must follow the ICommand interface) and delegate appropriately
-        ICommand? cmd = command switch
-        {
+        ICommand? cmd = command switch {
             //"a" => new ACommand(),
             "check" => new CheckCommand(),
             "exempt" => new ExemptCommand(),
@@ -41,8 +46,7 @@ public class Router
         };
 
         // If no command can be delegated, command is unknown
-        if (cmd == null)
-        {
+        if (cmd == null) {
             Console.WriteLine($"Unknown command: {command}");
             return;
         }

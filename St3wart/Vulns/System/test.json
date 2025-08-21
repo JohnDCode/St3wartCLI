@@ -8,17 +8,5 @@
     "FindData": "Enabled",
     "Operator": "Contains",
     "SecureCommand": "Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol"
-  },
-
-  {
-    "ID": "OS-002",
-    "Description": "Guest account is enabled",
-
-    "CheckType": "Registry",
-    "Key": "HKEY_LOCAL_MACHINE\\SAM\\SAM\\Domains\\Account\\Users\\000001F5",
-    "Value": "F",
-    "FindData": "0",
-    "Operator": "Contains",
-    "SecureValue": "0"
   }
 ]

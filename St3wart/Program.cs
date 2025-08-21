@@ -16,13 +16,17 @@ using System.Runtime.InteropServices;
 /// <summary>
 /// Entry point for executable
 /// </summary>
-class Program {
+class Program
+{
+
+    /*
 
     /// <summary>
     /// Entry point for executable
     /// </summary>
     /// <param name="args">CLI arguments for the command</param>
-    static void Main(string[] args) {
+    static void Main(string[] args)
+    {
 
         // Ensure Windows is the call site
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) { Errors.PrintError("This application is not cross-platform, please run on a Windows machine"); }
@@ -30,5 +34,13 @@ class Program {
         // Call router to route commands with CLI arguments
         var router = new Router();
         router.Route(args);
+    }
+
+    */
+
+    static async Task Main(string[] args)
+    {
+        CheckCommand test = new CheckCommand();
+        test.Execute(args);
     }
 }

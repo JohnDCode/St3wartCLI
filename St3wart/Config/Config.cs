@@ -9,6 +9,7 @@ JohnDavid Abe
 
 
 // Packages
+using System.ComponentModel.Design.Serialization;
 using System.Xml.Linq;
 
 
@@ -118,6 +119,65 @@ public static class Config {
         }
         return true;
     }
+    
+    
+    
+    /// <summary>
+    /// Create a section within the configuration file
+    /// </summary>
+    /// <param name="filePath">Path to the configuration file</param>
+    /// <param name="parentSection">Section to insert</param>
+    /// <param name="newSection">Element to insert to the configuration file</param>
+    /// <returns>
+    /// Success of writing the section to the config file
+    /// </returns>
+    public static bool WriteSection(string filePath, string parentSection, string newSection) {
+        
+        try {
+            // Load the XML config
+            XDocument? doc = XDocument.Load(filePath);
+
+            // Ensure the doc exists and is valid
+            if (doc == null || doc.Root == null) { return false; }
+
+            // If the parent section is root, simply add to the root element
+            if (parentSection == "root") {
+                doc.Root.Add(newSection);
+                
+            // Otherwise, look for the first occurence of the parent section and then add the new section to it
+            } else {
+                // Get the location of the parent section
+                XElement? parentSec = doc.Descendants(parentSection).FirstOrDefault();
+                
+                // If parent section is found, add the new section to it
+                if (parentSec is XElement parentXMLSec) {
+                    parentXMLSec.AddAfterSelf(new XElement(newSection));
+                }
+            }
+
+            // Save changes back to the file
+            doc.Save(filePath);
+            
+        } catch {
+            return false;
+        }
+        return true;
+    }
+    
+    
+    
+    /// <summary>
+    /// Remove a section from the configuration file
+    /// </summary>
+    /// <param name="filePath">Path to the configuration file</param>
+    /// <param name="section">Section to remove</param>
+    /// <returns>
+    /// Success of removing the section from the config file
+    /// </returns>
+    public static bool RemoveSection(string filePath, string section) {
+        return true;
+    }
+    
     
     
     /// <summary>

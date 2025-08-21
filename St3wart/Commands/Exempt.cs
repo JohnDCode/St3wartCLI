@@ -57,12 +57,14 @@ public class ExemptCommand : ICommand {
         }
     }
     
+    
+    
     /// <summary>
     /// Displays help information on the command
     /// </summary>
     public void Help() {
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("St3wart Excempt");
+        Console.WriteLine("St3wart Exempt");
         Console.WriteLine("Usage: St3wart.exe exempt [OPTIONS] <ACTION> <VULN ID>");
         Console.WriteLine("Example: St3wart.exe exempt add OS-001");
         Console.ResetColor();

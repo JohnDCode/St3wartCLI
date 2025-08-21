@@ -27,7 +27,7 @@ public class ExemptCommand : ICommand {
         try {
 
             // Check if the configuration file has been created and create one if not
-            string filePath = Directory.GetCurrentDirectory() + "/config.xml";
+            string filePath = Directory.GetCurrentDirectory() + "/St3wart.xml";
             if (!File.Exists(filePath)) { if(!Config.CreateConfig(filePath)) { Errors.PrintError("Can not create configuration file"); return; } }
 
             // Create the exception element corresponding to the exempt request

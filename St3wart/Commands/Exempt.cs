@@ -24,35 +24,31 @@ public class ExemptCommand : ICommand {
     /// <param name="args">CLI arguments for the command</param>
     public void Execute(string[] args) {
 
-        // Check if the configuration file has been created and create one if not
-        string filePath = Directory.GetCurrentDirectory() + "/config.xml";
-        if (!File.Exists(filePath)) { Config.CreateConfig(filePath); }
-
-        // Ensure the file was created / does exist
-        if (!File.Exists(filePath)) { Errors.PrintError("Can not create configuration file"); return; }
-
-        // Create the exception element corresponding to the exempt request
-        XElement e;
         try {
-            e = new XElement("exemption", new XAttribute("ID", args[2]));
-        } catch (IndexOutOfRangeException) {
-            Help(); return;
-        }
 
-        // Get the action to perform on the provided exception
-        string action;
-        try {
-            action = args[1].ToLower();
-        } catch (IndexOutOfRangeException) {
-            Help(); return;
-        }
+            // Check if the configuration file has been created and create one if not
+            string filePath = Directory.GetCurrentDirectory() + "/config.xml";
+            if (!File.Exists(filePath)) { Config.CreateConfig(filePath); }
 
-        // Add or remove the exemption according to the command arguments
-        if (action == "add") {
-            Config.WriteElement(filePath, "exemptions", e);
-        } else if (action == "remove") {
-            Config.RemoveElement(filePath, "exemptions", e);
-        } else {
+            // Ensure the file was created / does exist
+            if (!File.Exists(filePath)) { Errors.PrintError("Can not create configuration file"); return; }
+
+            // Create the exception element corresponding to the exempt request
+            XElement e = new XElement("exemption", new XAttribute("ID", args[2]));
+
+            // Get the action to perform on the provided exception
+            string action = args[1].ToLower();
+
+            // Add or remove the exemption according to the command arguments
+            if (action == "add") {
+                Config.WriteElement(filePath, "exemptions", e);
+            } else if (action == "remove") {
+                Config.RemoveElement(filePath, "exemptions", e);
+            } else {
+                Help();
+            }
+            
+        } catch {
             Help();
         }
     }

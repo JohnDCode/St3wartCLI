@@ -19,45 +19,40 @@ public class VulnCommand : ICommand {
     /// <param name="args">CLI arguments for the command</param>
     public void Execute(string[] args) {
 
-        // Get the specified file path of the vuln bank
-        string filePath;
         try {
-            filePath = args[1];
-        } catch (IndexOutOfRangeException) {
-            Help(); return;
+
+            // Get the specified file path of the vuln bank
+            string filePath = args[1];
+
+            // Get all vulns from the file
+            Dictionary<string, Check> checks = DataHandler.VulnsFromFile(filePath);
+
+            // Ensure checks populated
+            if (checks == null) { Errors.PrintError("Can not retrieve vulns from JSON database"); return; }
+
+            // Find the specific check by looking up the ID in the bank
+            Check vuln = checks[args[2]];
+
+            // Check if vuln was found
+            if (vuln == null) { Errors.PrintError($"Can not retrieve vuln {args[2]} from JSON database"); return; }
+            
+            // Set the text color for cool output of the vuln
+            Console.ForegroundColor = ConsoleColor.Green;
+
+            // Check the type of the check and print data on the vuln accordingly
+            if (vuln is RegistryCheck regCheck) {
+                Console.WriteLine(regCheck.Print());
+            } else if (vuln is PowerShellCheck psCheck) {
+                Console.WriteLine(psCheck.Print());
+            } else {
+                Errors.PrintError("Unknown check type");
+            }
+
+            // Reset the foreground color
+            Console.ResetColor();
+        } catch {
+            Help();
         }
-
-        // Get all vulns from the file
-        Dictionary<string, Check> checks = DataHandler.VulnsFromFile(filePath);
-
-        // Ensure checks populated
-        if (checks == null) { Errors.PrintError("Can not retrieve vulns from JSON database"); return; }
-
-        // Find the specific check by looking up the ID in the bank
-        Check vuln;
-        try {
-            vuln = checks[args[2]];
-        } catch (IndexOutOfRangeException) {
-            Help(); return;
-        }
-
-        // Check if vuln was found
-        if (vuln == null) { Errors.PrintError($"Can not retrieve vuln {args[2]} from JSON database"); return; }
-        
-        // Set the text color for cool output of the vuln
-        Console.ForegroundColor = ConsoleColor.Green;
-
-        // Check the type of the check and print data on the vuln accordingly
-        if (vuln is RegistryCheck regCheck) {
-            Console.WriteLine(regCheck.Print());
-        } else if (vuln is PowerShellCheck psCheck) {
-            Console.WriteLine(psCheck.Print());
-        } else {
-            Errors.PrintError("Unknown check type");
-        }
-
-        // Reset the foreground color
-        Console.ResetColor();
     }
 
 

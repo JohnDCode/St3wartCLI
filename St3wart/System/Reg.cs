@@ -15,7 +15,7 @@ using System.Runtime.Versioning;
 
 
 /// <summary>
-/// Used to execute batch checks to the Windows registry
+/// Used to execute batch checks to the Windows Registry
 /// </summary>
 [SupportedOSPlatform("Windows")]
 public static class RegistryRunner {
@@ -159,17 +159,17 @@ public static class RegistryRunner {
 public class RegistryCheck : Check {
 
     /// <summary>
-    /// The key to check within the registry
+    /// The key to check within the Registry
     /// </summary>
     public string? Key { get; set; }
 
     /// <summary>
-    /// The value to check within the specific registry key
+    /// The value to check within the specific Registry key
     /// </summary>
     public string? Value { get; set; }
     
     /// <summary>
-    /// The data to write within the specific registry key/value to remediate the vuln
+    /// The data to write within the specific Registry key/value to remediate the vuln
     /// </summary>
     public string? SecureValue { get; set; }
         
@@ -191,7 +191,7 @@ public class RegistryResult {
     public required RegistryCheck Check { get; set; }
 
     /// <summary>
-    /// The data from the registry value
+    /// The data from the Registry value
     /// </summary>
     public required string Data { get; set; } = string.Empty;
 
@@ -201,7 +201,7 @@ public class RegistryResult {
     public required bool CheckPass { get; set; }
     
     /// <summary>
-    /// The success state of the registry request
+    /// The success state of the Registry request
     /// </summary>
     public required bool Success { get; set; }
 }

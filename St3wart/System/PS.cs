@@ -1,7 +1,7 @@
 /*
 
 Stewart CLI
-/System/PS.cs - Handles batch Powershell requests
+/System/PS.cs - Handles batch PowerShell requests
 JohnDavid Abe 
 
 */
@@ -10,14 +10,13 @@ JohnDavid Abe
 
 // Packages
 using System.Collections.Concurrent;
-using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Text;
 
 
 
 /// <summary>
-/// Represents and handles one specific Powershell instance / process
+/// Represents and handles one specific PowerShell instance / process
 /// </summary>
 public class PowerShellInstance : IDisposable {
 
@@ -42,14 +41,14 @@ public class PowerShellInstance : IDisposable {
     private StreamReader? _errorReader;
 
     /// <summary>
-    /// Seaphmore slim, controls releasing new commands
+    /// SemaphoreSlim for releasing commands
     /// </summary>
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 
     /// <summary>
     /// The delimiter to mark the end to each command output in the output streams
     /// </summary>
-    private readonly string _delimiter = $"###END_COMMAND_{Guid.NewGuid():N}###";
+    private readonly string _delimiter = $"###END_ST3WART_COMMAND_{Guid.NewGuid():N}###";
 
     /// <summary>
     /// Tracks if the resources have been cleared and freed after execution
@@ -59,10 +58,10 @@ public class PowerShellInstance : IDisposable {
 
 
     /// <summary>
-    /// Spawns the new Powershell process
+    /// Spawns the new PowerShell process
     /// </summary>
     /// <returns>
-    /// The success state of initalizing the new Powershell process
+    /// The success state of initalizing the new PowerShell process
     /// </returns>
     public async Task<bool> InitializeAsync() {
 
@@ -88,7 +87,7 @@ public class PowerShellInstance : IDisposable {
             _process = Process.Start(psi);
 
             // Ensure the process spawned
-            if (_process == null) return false;
+            if (_process == null) { return false; }
 
             // I/O Streams
             _inputWriter = _process.StandardInput;
@@ -112,12 +111,12 @@ public class PowerShellInstance : IDisposable {
 
 
     /// <summary>
-    /// Execute a single command within the Powershell instance and checks for the appropriate vuln finding
+    /// Execute a single command within the PowerShell instance and checks for the vuln finding according to the output
     /// </summary>
-    /// <param name="check">The Powershell check to execute</param>
+    /// <param name="check">The PowerShell check to execute</param>
     /// <param name="timeoutMs">The timeout (in ms) allotted for the command to run</param>
     /// <returns>
-    /// The output and details of the check as a PowershellResult object
+    /// The output and details of the check as a PowerShellResult object
     /// </returns>
     public async Task<PowerShellResult> ExecuteCommandAsync(PowerShellCheck check, int timeoutMs = 30000) {
 
@@ -140,7 +139,21 @@ public class PowerShellInstance : IDisposable {
             var output = new StringBuilder();
             var errors = new List<string>();
 
+            // Define a blank result object to return if check does not complete
+            PowerShellResult result = new PowerShellResult {
+                Check = check,
+                Output = "",
+                Errors = new List<string>(),
+                TimedOut = false,
+                CheckPass = false,
+                Success = false
+            };
+            
+            // Ensure streams populated
+            if (_outputReader == null || _errorReader == null) { return result; }
+
             try {
+                
                 // Read output until cancellation object cancels operation
                 while (!cts.Token.IsCancellationRequested) {
 
@@ -169,36 +182,44 @@ public class PowerShellInstance : IDisposable {
                     errors.Add(line);
                 }
 
+                // Get the output in the form of a trimmed string
+                string outputStr = output.ToString().TrimEnd('\r', '\n');
+
+                // Ensure the output and the data to compare to are populated
+                if (outputStr == null || check.FindData == null) { return result; }
+
+
                 // Test the check pass based on the specific operator and PowerShell output
                 bool checkPass = false;
                 switch (check.Operator) {
                     case "GreaterThan": 
-                        checkPass = !(int.Parse(output.ToString().TrimEnd('\r', '\n')) > int.Parse(check.FindData));
+                        checkPass = !(int.Parse(outputStr) > int.Parse(check.FindData));
                         break;
                     case "LessThan":
-                        checkPass = !(int.Parse(output.ToString().TrimEnd('\r', '\n')) < int.Parse(check.FindData));
+                        checkPass = !(int.Parse(outputStr) < int.Parse(check.FindData));
                         break;
                     case "EqualTo":
-                        checkPass = !(int.Parse(output.ToString().TrimEnd('\r', '\n')) == int.Parse(check.FindData) || output.ToString().TrimEnd('\r', '\n') == check.FindData);
+                        checkPass = !(int.Parse(outputStr) == int.Parse(check.FindData) || outputStr == check.FindData);
                         break;
                     case "Contains":
-                        checkPass = !output.ToString().TrimEnd('\r', '\n').Contains(check.FindData);
+                        checkPass = !outputStr.Contains(check.FindData);
                         break;
                     case "NotEqualTo":
-                        checkPass = int.Parse(output.ToString().TrimEnd('\r', '\n')) == int.Parse(check.FindData) || output.ToString().TrimEnd('\r', '\n') == check.FindData;
+                        checkPass = int.Parse(outputStr) == int.Parse(check.FindData) || outputStr == check.FindData;
                         break;
                     case "NotContains":
-                        checkPass = output.ToString().TrimEnd('\r', '\n').Contains(check.FindData);
+                        checkPass = outputStr.Contains(check.FindData);
                         break;
                     default:
                         break;
                 }
 
 
-                // Construct a struct to hold all relevant info of the check and return
+
+                // Construct a result object to hold all relevant info of the check and return
                 return new PowerShellResult {
                     Check = check,
-                    Output = output.ToString().TrimEnd('\r', '\n'),
+                    Output = outputStr,
                     Errors = errors,
                     Success = errors.Count == 0,
                     TimedOut = cts.Token.IsCancellationRequested,
@@ -206,22 +227,12 @@ public class PowerShellInstance : IDisposable {
                 };
             }
 
-            // If  the cancellation object requested early exit, log the timeout
-            catch (OperationCanceledException) {
-                return new PowerShellResult {
-                    Check = check,
-                    Output = output.ToString(),
-                    Errors = new List<string> { "Command timed out" },
-                    Success = false,
-                    TimedOut = true,
-                    CheckPass = false
-                };
-            }
+            // If the check failed, return blank result
+            catch (Exception) { return result; }
         }
 
-
         finally {
-            // Release semaphore slim so next command on the process can enter
+            // Release semaphore slim so next command can enter
             _semaphore.Release();
         }
     }
@@ -232,7 +243,7 @@ public class PowerShellInstance : IDisposable {
     /// Read the next line of a particular data stream
     /// </summary>
     /// <param name="reader">The stream to read output from</param>
-    /// <param name="cancellationToken">The cancellation object to catch errors and exit the current command execution</param>
+    /// <param name="cancellationToken">The cancellation object to handle early execution exit</param>
     /// <returns>
     /// The compiled string representing the next line in the stream
     /// </returns>
@@ -240,7 +251,7 @@ public class PowerShellInstance : IDisposable {
 
         try {
             
-            // Set the timeout based on if the output or error stream is being read
+            // Set the timeout based on if the output or error stream is being read (longer timeout for reading the output stream)
             int timeOut;
             if (readingError) {
                 timeOut = 2000;
@@ -259,15 +270,16 @@ public class PowerShellInstance : IDisposable {
 
                 // Return the stream output line
                 return await readTask;
-
-                // Return null as the cancellation was requested by the CancellationToken object
+                
+            // Return null as the cancellation task finished and retrieving the next stream line stalled
             } else { return null; }
         }
 
         // Read errors do not necessairly mean command errors, so simply return null
-        catch (OperationCanceledException) { throw; }
-        catch { return null; }
+        catch (Exception) { return null; }
     }
+
+
 
     /// <summary>
     /// Free the resources from the process and kill the process
@@ -275,16 +287,16 @@ public class PowerShellInstance : IDisposable {
     public void Dispose() {
 
         // If already disposed no need to modify any resources
-        if (_disposed) return;
+        if (_disposed) { return; }
         _disposed = true;
 
-        // Attempt to run the exit command to powershell instance
+        // Attempt to run the exit command to PowerShell instance
         try {
             _inputWriter?.WriteLine("exit");
             _inputWriter?.Flush();
             _process?.WaitForExit(2000);
 
-            // If there are any errors, resources will be freed forcibly anyways
+        // If there are any errors, resources will be freed forcibly anyways
         }
         catch { }
 
@@ -306,12 +318,12 @@ public class PowerShellInstance : IDisposable {
 public class PowerShellPool : IDisposable {
 
     /// <summary>
-    /// The queue of processes / Powershell instances to release commands/checks to
+    /// The queue of processes / PowerShell instances to release commands/checks to
     /// </summary>
     private readonly ConcurrentQueue<PowerShellInstance> _availableInstances = new();
 
     /// <summary>
-    /// The list of all processes / Powershell instances maintained within the pool
+    /// The list of all processes / PowerShell instances maintained within the pool
     /// </summary>
     private readonly List<PowerShellInstance> _allInstances = new();
 
@@ -326,19 +338,19 @@ public class PowerShellPool : IDisposable {
     private readonly int _poolSize;
 
     /// <summary>
-    /// Overall disposed state representing if all memory from all processes / Powershell instances has been disposed and released
+    /// Overall disposed state representing if all memory from all processes / PowerShell instances has been disposed and released
     /// </summary>
     private volatile bool _disposed = false;
 
 
 
     /// <summary>
-    /// Set the total pool size of the overall pool
+    /// Constructor of the PowerShellPool object
     /// </summary>
     /// <param name="poolSize">Number to set the pool size of the overall pool to</param>
     public PowerShellPool(int poolSize = 5) {
 
-        // Set the pool size and reinitalize the Semaphore with the new pool size
+        // Set the pool size and initalize the Semaphore with the new pool size
         _poolSize = poolSize;
         _semaphore = new SemaphoreSlim(poolSize, poolSize);
     }
@@ -346,7 +358,7 @@ public class PowerShellPool : IDisposable {
 
 
     /// <summary>
-    /// Initalize {_poolSize} number of Powershell instances
+    /// Initalize {_poolSize} number of PowerShell instances
     /// </summary>
     /// <returns>
     /// The overall success state of creating the instances
@@ -379,7 +391,6 @@ public class PowerShellPool : IDisposable {
 
         // If some processes did not actually spawn
         if (actualCount < _poolSize) {
-
             // Release the difference to match actual instances
             _semaphore.Release(_poolSize - actualCount);
         }
@@ -391,12 +402,12 @@ public class PowerShellPool : IDisposable {
 
 
     /// <summary>
-    /// Create an object of and spawn a specific Powershell instance
+    /// Create an object of and spawn a specific PowerShell instance
     /// </summary>
     /// <returns>
-    /// The initalized PowershellInstance object
+    /// The initalized PowerShellInstance object
     /// </returns>
-    private async Task<PowerShellInstance> CreateInstanceAsync() {
+    private async Task<PowerShellInstance?> CreateInstanceAsync() {
 
         // Create the instance and spawn the instance
         var instance = new PowerShellInstance();
@@ -415,12 +426,12 @@ public class PowerShellPool : IDisposable {
 
 
     /// <summary>
-    /// Dispatch a single Powershell check to the next available Powershell instance
+    /// Dispatch a single PowerShell check to the next available PowerShell instance
     /// </summary>
-    /// <param name="check">The Powershell check to execute and check</param>
+    /// <param name="check">The PowerShell check to execute and check</param>
     /// <param name="timeoutMs">The timeout (in ms) allotted for the command to run</param>
     /// <returns>
-    /// The output and details of the check as a PowershellResult object
+    /// The output and details of the check as a PowerShellResult object
     /// </returns>
     public async Task<PowerShellResult> ExecuteCommandAsync(PowerShellCheck check, int timeoutMs = 30000) {
 
@@ -431,13 +442,13 @@ public class PowerShellPool : IDisposable {
         await _semaphore.WaitAsync();
 
         try {
-            // Attempt to remove and then utilize the available Powershell instance at the top of the queue
+            // Attempt to remove and then utilize the available PowerShell instance at the top of the queue
             if (_availableInstances.TryDequeue(out var instance)) {
 
-                // Execute the command using the Powershell instance and return the output
+                // Execute the command using the PowerShell instance and return the output
                 try { return await instance.ExecuteCommandAsync(check, timeoutMs); }
 
-                // Requeue the Powershell instance to be used again
+                // Requeue the PowerShell instance to be used again
                 finally { _availableInstances.Enqueue(instance); }
             }
 
@@ -452,11 +463,11 @@ public class PowerShellPool : IDisposable {
 
 
     /// <summary>
-    /// Dispatch multiple Powershell checks to all maintained Powershell instances within the pool
+    /// Dispatch multiple PowerShell checks to all maintained PowerShell instances within the pool
     /// </summary>
-    /// <param name="checks">The list of Powershell checks to execute and check for findings</param>
-    /// <param name="maxConcurrency">The number of commands that can run at once within this batch</param>
-    /// <param name="timeoutMs">The timeout (in ms) allotted for the command to run</param>
+    /// <param name="checks">The list of PowerShell checks to execute and check for findings</param>
+    /// <param name="maxConcurrency">The number of checks that can run at once within this batch</param>
+    /// <param name="timeoutMs">The timeout (in ms) allotted for the command for the check to run</param>
     public async Task<List<PowerShellResult>> ExecuteCommandsBatchAsync(List<PowerShellCheck> checks, int maxConcurrency = -1, int timeoutMs = 30000) {
 
         // If set to -1, then just set the Semaphore Slim to use all available resources
@@ -502,7 +513,6 @@ public class PowerShellPool : IDisposable {
         // End the Semaphore
         _semaphore?.Dispose();
     }
-
 }
 
 

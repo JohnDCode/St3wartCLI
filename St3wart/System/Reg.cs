@@ -204,4 +204,12 @@ public class RegistryResult {
     /// The success state of the Registry request
     /// </summary>
     public required bool Success { get; set; }
+    
+    /// <summary>
+    /// Formats the result to a single string
+    /// </summary>
+    /// <returns>A formatted string with the RegistryResult data</returns>
+    public string Print() {
+        return $"ID: {this.Check.ID}\nDescription: {this.Check.Description}\nCheck Pass: {this.CheckPass}";
+    }
 }

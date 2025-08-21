@@ -573,4 +573,12 @@ public class PowerShellResult {
     /// The success of the check
     /// </summary>
     public required bool CheckPass { get; set; }
+    
+    /// <summary>
+    /// Formats the result to a single string
+    /// </summary>
+    /// <returns>A formatted string with the PowerShellResult data</returns>
+    public string Print() {
+        return $"ID: {this.Check.ID}\nDescription: {this.Check.Description}\nCheck Pass: {this.CheckPass}";
+    }
 }

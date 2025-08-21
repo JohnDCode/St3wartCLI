@@ -17,6 +17,5 @@ public class CheckCommand : ICommand
         var checks = DataHandler.VulnsFromFile(@"C:\Users\John\Desktop\St3wartCLI\St3wartCLI\St3wart\Vulns\System\test.json");
         Console.WriteLine(checks["OS-002"].Description);
         Console.Write("Running Check Command");
-
     }
 }

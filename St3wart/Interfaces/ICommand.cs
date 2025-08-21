@@ -6,8 +6,12 @@ JohnDavid Abe
 
 */
 
-public interface ICommand
-{
-    // Method to perform on execution of each command
+
+
+/// <summary>
+/// Interface applied to each of the CLI commands
+/// </summary> 
+public interface ICommand {
     void Execute(string[] args);
+    //void Help();
 }

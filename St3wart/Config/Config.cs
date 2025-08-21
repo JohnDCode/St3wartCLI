@@ -118,4 +118,38 @@ public static class Config {
         }
         return true;
     }
+    
+    
+    /// <summary>
+    /// Fetch all elements from a section of the configuration file
+    /// </summary>
+    /// <param name="filePath">Path to the configuration file</param>
+    /// <param name="section">Section to fetch elements from</param>
+    /// <returns></returns>
+    public static List<XElement> FetchElements(string filePath, string section) {
+        
+        try {
+            // Load the XML config
+            XDocument? doc = XDocument.Load(filePath);
+
+            // Ensure the doc exists and is valid
+            if (doc == null || doc.Root == null) { return new List<XElement>(); }
+            
+            // Find the section (or the first occurrence of the section)
+            XElement? XMLSection = doc.Descendants(section).FirstOrDefault();
+
+            // Check that the section was found
+            if (XMLSection == null) { return new List<XElement>(); }
+
+            // Retrieve the elements within the section
+            List<XElement> elements = [.. XMLSection.Elements()];
+            
+            // Ensure the elements were found and return accordingly
+            if (elements == null) { return new List<XElement>(); }
+            return elements;
+            
+        } catch {
+            return new List<XElement>();
+        }
+    }
 }

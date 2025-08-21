@@ -9,7 +9,9 @@ JohnDavid Abe
 
 
 // Packages
+using System.ComponentModel.Design.Serialization;
 using System.Runtime.Versioning;
+using System.Xml.Linq;
 
 
 
@@ -25,77 +27,89 @@ public class CheckCommand : ICommand {
     /// <param name="args">CLI arguments for the command</param>
     public async Task Execute(string[] args) {
         
-        // Get the specified file path of the vuln bank
-        string filePath = args[1];
+        try {
 
-        // Get all vulns from the file
-        Dictionary<string, Check> checks = DataHandler.VulnsFromFile(filePath);
+            // Get the specified file path of the vuln bank
+            string filePath = args[1];
 
-        // Ensure checks populated
-        if (checks == null) { Errors.PrintError("Can not retrieve vulns from JSON database"); return; }
+            // Get all vulns from the file
+            Dictionary<string, Check> checks = DataHandler.VulnsFromFile(filePath);
 
-        // Organize checks into lists of their types
-        List<PowerShellCheck> psChecks = new List<PowerShellCheck>();
-        List<RegistryCheck> regChecks = new List<RegistryCheck>();
-        foreach (KeyValuePair<string, Check> check in checks) {
-            if (check.Value is PowerShellCheck psCheck) {
-                psChecks.Add(psCheck);
-            } else if (check.Value is RegistryCheck regCheck) {
-                regChecks.Add(regCheck);
+            // Ensure checks populated
+            if (checks == null) { Errors.PrintError("Can not retrieve vulns from JSON database"); return; }
+
+            // Organize checks into lists of their types
+            List<PowerShellCheck> psChecks = new List<PowerShellCheck>();
+            List<RegistryCheck> regChecks = new List<RegistryCheck>();
+            foreach (KeyValuePair<string, Check> check in checks) {
+                if (check.Value is PowerShellCheck psCheck) {
+                    psChecks.Add(psCheck);
+                } else if (check.Value is RegistryCheck regCheck) {
+                    regChecks.Add(regCheck);
+                }
             }
+
+            // Start the PS pool
+            using var pool = new PowerShellPool(poolSize: 2);
+            if (!await pool.InitializeAsync()) {
+                Console.WriteLine("Failed to initialize PowerShell pool");
+                return;
+            }
+
+            // Run the two types of checks concurrently
+            Task<List<PowerShellResult>> psTask = pool.ExecuteCommandsBatchAsync(psChecks);
+            Task<List<RegistryResult>> regTask = Task.Run(() => RegistryRunner.ExecuteRegistryChecks(regChecks));
+            await Task.WhenAll(psTask, regTask);
+
+            // Extract the reuslts of both sets of checks
+            List<PowerShellResult> psResults = await psTask;
+            List<RegistryResult> regResults = await regTask;
+            
+            // Get all the exemptions from the XML config file
+            List<XElement> exceptions = Config.FetchElements(Directory.GetCurrentDirectory() + "/St3wart.xml", "exemptions");
+            List<string> exceptionIDs = new List<string>();
+            foreach (XElement e in exceptions) {
+                string? id = (string?) e.Attribute("ID");
+                if (id is string idStr) { exceptionIDs.Add(idStr); }
+            }
+
+            // Display info on both sets of results and log said results
+            foreach(PowerShellResult psResult in psResults) {
+
+                // Ensure the vuln is not marked as an exemption
+                string? id = psResult.Check.ID;
+                if (id is string checkID) { 
+                    if (exceptionIDs.Contains(checkID)) { continue; }
+                }
+
+                // Format the result to a readable string
+                string strResult = psResult.Print();
+
+                // Set the output color based on if the check passed
+                if (psResult.CheckPass == true) { Console.ForegroundColor = ConsoleColor.Green; } else { Console.ForegroundColor = ConsoleColor.Red; }
+
+                // Write the output to the console
+                Console.WriteLine(strResult);
+            }
+
+            foreach(RegistryResult regResult in regResults) {
+
+                // Format the result to a readable string
+                string strResult = regResult.Print();
+
+                // Set the output color based on if the check passed
+                if (regResult.CheckPass == true) { Console.ForegroundColor = ConsoleColor.Green; } else { Console.ForegroundColor = ConsoleColor.Red; }
+
+                // Write the output to the console
+                Console.WriteLine(strResult);
+            }
+
+            // Reset the foreground color after printing all of the vulns
+            Console.ResetColor();
+
+        } catch {
+            Help();
         }
-
-        // Start the PS pool
-        using var pool = new PowerShellPool(poolSize: 15);
-        if (!await pool.InitializeAsync()) {
-            Console.WriteLine("Failed to initialize PowerShell pool");
-            return;
-        }
-
-        Console.WriteLine("HERE 4");
-
-
-        // // // Run the two types of checks concurrently
-        // // Task<List<PowerShellResult>> psTask = pool.ExecuteCommandsBatchAsync(psChecks);
-        // // Task<List<RegistryResult>> regTask = Task.Run(() => RegistryRunner.ExecuteRegistryChecks(regChecks));
-        // // await Task.WhenAll(psTask, regTask);
-
-        // // // Extract the reuslts of both sets of checks
-        // // List<PowerShellResult> psResults = await psTask;
-        // // List<RegistryResult> regResults = await regTask;
-        // var psResults = await pool.ExecuteCommandsBatchAsync(psChecks);
-
-        // // Display info on both sets of results
-        // foreach(PowerShellResult psResult in psResults) {
-
-        //     Console.WriteLine("HERE");
-
-        //     // Format the result to a readable string
-        //     string strResult = psResult.Print();
-
-        //     // Set the output color based on if the check passed
-        //     if (psResult.CheckPass == true) { Console.ForegroundColor = ConsoleColor.Green; } else { Console.ForegroundColor = ConsoleColor.Red; }
-
-        //     // Write the output to the console
-        //     Console.WriteLine(strResult);
-        // }
-
-        // Console.WriteLine("PAST");
-        
-        // // foreach(RegistryResult regResult in regResults) {
-
-        // //     // Format the result to a readable string
-        // //     string strResult = regResult.Print();
-
-        // //     // Set the output color based on if the check passed
-        // //     if (regResult.CheckPass == true) { Console.ForegroundColor = ConsoleColor.Green; } else { Console.ForegroundColor = ConsoleColor.Red; }
-
-        // //     // Write the output to the console
-        // //     Console.WriteLine(strResult);
-        // // }
-
-        // // Reset the foreground color after printing all of the vulns
-        // Console.ResetColor();
     }
 
 
@@ -112,11 +126,4 @@ public class CheckCommand : ICommand {
         Console.ResetColor();
     }
 }
-
-
-
-        // Will need to add exempt stuff later
-        
-
-        // Then check if there was a last check in the xml file, if there was, remove it
-        // Add the results of each check to the xml
+// Output the results of the check to xml and then cleanup

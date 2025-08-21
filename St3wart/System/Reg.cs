@@ -10,12 +10,14 @@ JohnDavid Abe
 
 // Packages
 using Microsoft.Win32;
+using System.Runtime.Versioning;
 
 
 
 /// <summary>
 /// Used to execute batch checks to the Windows registry
 /// </summary>
+[SupportedOSPlatform("Windows")]
 public static class RegistryRunner {
 
     /// <summary>
@@ -35,15 +37,19 @@ public static class RegistryRunner {
         
         try {
 
+            // Ensure check and value exists in Check
+            if (check.Key == null || check.Value == null) { return result; }
+
             // Split the key into the root key and its subkey
             int firstSlash = check.Key.IndexOf(@"\");
             if (firstSlash == -1) { return result; }
+
+            // Seperate the key into the base and subkey
             string baseKey = check.Key.Substring(0, firstSlash);
             string subKey = check.Key.Substring(firstSlash + 1);
 
-
-            // Determine the base key and open the root key accordingly (allows for abbreviation in root key)
-            RegistryKey baseRk;
+            // Determine the base key and load accordingly (allows for abbreviation in JSON)
+            RegistryKey? baseRk;
             if (baseKey.Contains("HKEY_CLASSES_ROOT") || baseKey.Contains("HKCR")) {
                 baseRk = Registry.ClassesRoot;
             } else if (baseKey.Contains("HKEY_CURRENT_USER") || baseKey.Contains("HKCU")) {
@@ -56,9 +62,13 @@ public static class RegistryRunner {
                 baseRk = Registry.CurrentConfig;
             } else { return result; }
 
+            // Check that the base key opened
+            if (baseRk == null) { return result; }
 
             // Open the subkey
-            using var subRk = baseRk.OpenSubKey(subKey);
+            RegistryKey? subRk = baseRk.OpenSubKey(subKey);
+
+            // Check that the subkey opened
             if (subRk == null) { return result; }
 
             // Access the value within the subkey
@@ -69,42 +79,56 @@ public static class RegistryRunner {
             baseRk.Close();
             subRk.Close();
 
-            // Test the check pass based on the specific operator 
+            // Define if the check passed or not
             bool checkPass = false;
-            switch (check.Operator) {
-                case "GreaterThan":
-                    checkPass = !(int.Parse(value.ToString().TrimEnd('\r', '\n')) > int.Parse(check.FindData));
-                    break;
-                case "LessThan":
-                    checkPass = !(int.Parse(value.ToString().TrimEnd('\r', '\n')) < int.Parse(check.FindData));
-                    break;
-                case "EqualTo":
-                    checkPass = !(int.Parse(value.ToString().TrimEnd('\r', '\n')) == int.Parse(check.FindData) || value.ToString().TrimEnd('\r', '\n') == check.FindData);
-                    break;
-                case "Contains":
-                    checkPass = !value.ToString().TrimEnd('\r', '\n').Contains(check.FindData);
-                    break;
-                case "NotEqualTo":
-                    checkPass = int.Parse(value.ToString().TrimEnd('\r', '\n')) == int.Parse(check.FindData) || value.ToString().TrimEnd('\r', '\n') == check.FindData;
-                    break;
-                case "NotContains":
-                    checkPass = value.ToString().TrimEnd('\r', '\n').Contains(check.FindData);
-                    break;
-                default:
-                    break;
-            }
 
+            // Ensure check data was populated in the given check
+            if (value is object regVal) {
 
-            // Construct a struct to hold all relevant info of the command and return
-            return new RegistryResult {
-                Check = check,
-                Data = value.ToString(),
-                CheckPass = checkPass,
-                Success = true
-            };
+                // Get the Registry value as a string
+                string? strValue = value.ToString();
 
+                // Ensure the value and the data to compare to are populated
+                if (strValue == null || check.FindData == null) { return result; }
+
+                // Test the check pass based on the specific operator
+                switch (check.Operator) {
+                    case "GreaterThan":
+                        checkPass = !(int.Parse(strValue.TrimEnd('\r', '\n')) > int.Parse(check.FindData));
+                        break;
+                    case "LessThan":
+                        checkPass = !(int.Parse(strValue.TrimEnd('\r', '\n')) < int.Parse(check.FindData));
+                        break;
+                    case "EqualTo":
+                        checkPass = !(int.Parse(strValue.TrimEnd('\r', '\n')) == int.Parse(check.FindData) || strValue.TrimEnd('\r', '\n') == check.FindData);
+                        break;
+                    case "Contains":
+                        checkPass = !strValue.TrimEnd('\r', '\n').Contains(check.FindData);
+                        break;
+                    case "NotEqualTo":
+                        checkPass = int.Parse(strValue.TrimEnd('\r', '\n')) == int.Parse(check.FindData) || strValue.TrimEnd('\r', '\n') == check.FindData;
+                        break;
+                    case "NotContains":
+                        checkPass = strValue.TrimEnd('\r', '\n').Contains(check.FindData);
+                        break;
+                    default:
+                        break;
+                }
+                
+                // Construct a struct to hold all relevant info of the command and return
+                return new RegistryResult {
+                    Check = check,
+                    Data = strValue,
+                    CheckPass = checkPass,
+                    Success = true
+                };
+            
+            
+            
+            // If the value did not populate properly, return blank RegistryResult
+            } else { return result; }
         }
-        catch (Exception e) { return result; }
+        catch (Exception) { return result; }
     }
 
 

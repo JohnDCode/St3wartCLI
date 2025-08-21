@@ -12,6 +12,6 @@ JohnDavid Abe
 /// Interface applied to each of the CLI commands
 /// </summary> 
 public interface ICommand {
-    void Execute(string[] args);
+    Task Execute(string[] args);
     void Help();
 }

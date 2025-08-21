@@ -11,6 +11,6 @@ JohnDavid Abe
 public class SecureCommand : ICommand
 {
     // Execute method (ran upon command)
-    public void Execute(string[] args) { }
+    public async Task Execute(string[] args) { } 
     public void Help() { }
 }

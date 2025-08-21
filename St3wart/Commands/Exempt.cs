@@ -22,7 +22,7 @@ public class ExemptCommand : ICommand {
     /// Method run on execution of the command
     /// </summary>
     /// <param name="args">CLI arguments for the command</param>
-    public void Execute(string[] args) {
+    public async Task Execute(string[] args) {
 
         try {
 

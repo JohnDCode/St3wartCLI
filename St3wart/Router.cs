@@ -8,22 +8,28 @@ JohnDavid Abe
 
 
 
+// Packages
+using System.Runtime.Versioning;
+
+
+
+[SupportedOSPlatform("Windows")]
 /// <summary>
 /// Delegates commands to the appropriate classes
 /// </summary>
-public class Router {
+public static class Router {
 
     /// <summary>
     /// Delegates commands to the appropriate classes
     /// </summary>
     /// <param name="args">CLI arguments for the command</param>
-    public void Route(string[] args) {
+    public static async Task Route(string[] args) {
 
         // Check that a command has been called
         if (args.Length == 0) {
             // If no command has been called, print info and display help command
             ICommand helpCmd = new HelpCommand();
-            helpCmd.Execute(args);
+            await helpCmd.Execute(args);
             return;
         }
 
@@ -52,6 +58,6 @@ public class Router {
         }
 
         // Execute the delegated command
-        cmd.Execute(args);
+        await cmd.Execute(args);
     }
 }

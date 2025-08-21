@@ -23,30 +23,27 @@ public class CheckCommand : ICommand {
     /// Method run on execution of the command
     /// </summary>
     /// <param name="args">CLI arguments for the command</param>
-    public async void Execute(string[] args) {
+    public async Task Execute(string[] args) {
+        
+        // Get the specified file path of the vuln bank
+        string filePath = args[1];
 
-        // // Get the specified file path of the vuln bank
-        // string filePath = args[1];
+        // Get all vulns from the file
+        Dictionary<string, Check> checks = DataHandler.VulnsFromFile(filePath);
 
-        // // Get all vulns from the file
-        // Dictionary<string, Check> checks = DataHandler.VulnsFromFile(filePath);
+        // Ensure checks populated
+        if (checks == null) { Errors.PrintError("Can not retrieve vulns from JSON database"); return; }
 
-        // // Ensure checks populated
-        // if (checks == null) { Errors.PrintError("Can not retrieve vulns from JSON database"); return; }
-
-        // // Organize checks into lists of their types
-        // List<PowerShellCheck> psChecks = new List<PowerShellCheck>();
-        // List<RegistryCheck> regChecks = new List<RegistryCheck>();
-        // foreach (KeyValuePair<string, Check> check in checks) {
-        //     if (check.Value is PowerShellCheck psCheck) {
-        //         psChecks.Add(psCheck);
-        //     } else if (check.Value is RegistryCheck regCheck) {
-        //         regChecks.Add(regCheck);
-        //     }
-        // }
-
-        // Console.WriteLine(checks["OS-001"].Description);
-        // Console.WriteLine(psChecks[0].ID);
+        // Organize checks into lists of their types
+        List<PowerShellCheck> psChecks = new List<PowerShellCheck>();
+        List<RegistryCheck> regChecks = new List<RegistryCheck>();
+        foreach (KeyValuePair<string, Check> check in checks) {
+            if (check.Value is PowerShellCheck psCheck) {
+                psChecks.Add(psCheck);
+            } else if (check.Value is RegistryCheck regCheck) {
+                regChecks.Add(regCheck);
+            }
+        }
 
         // Start the PS pool
         using var pool = new PowerShellPool(poolSize: 15);

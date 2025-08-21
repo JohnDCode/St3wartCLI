@@ -407,7 +407,7 @@ public class PowerShellPool : IDisposable {
     /// <returns>
     /// The initalized PowerShellInstance object
     /// </returns>
-    private async Task<PowerShellInstance?> CreateInstanceAsync() {
+    private async Task<PowerShellInstance> CreateInstanceAsync() {
 
         // Create the instance and spawn the instance
         var instance = new PowerShellInstance();

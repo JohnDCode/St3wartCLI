@@ -137,19 +137,19 @@ public class RegistryCheck : Check {
     /// <summary>
     /// The key to check within the registry
     /// </summary>
-    public string Key { get; set; }
+    public string? Key { get; set; }
 
     /// <summary>
     /// The value to check within the specific registry key
     /// </summary>
-    public string Value { get; set; }
+    public string? Value { get; set; }
     
     /// <summary>
-    /// The value to set within the specific registry key to secure the vuln
+    /// The data to write within the specific registry key/value to remediate the vuln
     /// </summary>
-    public string SecureValue { get; set; }
+    public string? SecureValue { get; set; }
         
-    public string Print() {
+    public override string Print() {
         return $"Vuln: {this.ID}\nDescription: {this.Description}\nKey: {this.Key}\nValue: {this.Value}\nFind Data: {this.FindData}\nSecure Value: {this.SecureValue}\nOperator: {this.Operator}";
     }
 }
@@ -157,10 +157,9 @@ public class RegistryCheck : Check {
 
 
 /// <summary>
-/// Handles information for the result of a single Powershell check
+/// Handles information for the result of a single Registry check
 /// </summary>
-public class RegistryResult
-{
+public class RegistryResult {
 
     /// <summary>
     /// The check which this result object contains data on the success of

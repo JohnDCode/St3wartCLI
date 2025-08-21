@@ -508,21 +508,21 @@ public class PowerShellPool : IDisposable {
 
 
 /// <summary>
-/// Holds information on a single vuln whos presence can be checked with Powershell
+/// Holds information on a single vuln whos presence can be checked with PowerShell
 /// </summary>
 public class PowerShellCheck : Check {
 
     /// <summary>
     /// The command to check the vuln's state
     /// </summary>
-    public string CheckCommand { get; set; }
+    public string? CheckCommand { get; set; }
     
     /// <summary>
-    /// The command to secure the vuln on the system
+    /// The command to remediate the vuln
     /// </summary>
-    public string SecureCommand { get; set; }
+    public string? SecureCommand { get; set; }
     
-    public string Print() {
+    public override string Print() {
         return $"Vuln: {this.ID}\nDescription: {this.Description}\nCheck Command: {this.CheckCommand}\nSecure Command: {this.SecureCommand}\nFind Data: {this.FindData}\nOperator: {this.Operator}";
     }
 }
@@ -530,7 +530,7 @@ public class PowerShellCheck : Check {
 
 
 /// <summary>
-/// Handles information for the result of a single Powershell check
+/// Handles information for the result of a single PowerShell check
 /// </summary>
 public class PowerShellResult {
 

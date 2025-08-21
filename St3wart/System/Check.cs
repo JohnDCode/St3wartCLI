@@ -40,7 +40,7 @@ public class Check {
     /// Formats the check to a single string
     /// </summary>
     /// <returns>A formatted string with the check data</returns>
-    public string Print() {
+    public virtual string Print() {
         return $"Vuln: {this.ID}\nDescription: {this.Description}";
     }
 }

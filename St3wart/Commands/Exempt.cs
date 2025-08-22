@@ -38,9 +38,9 @@ public class ExemptCommand : ICommand {
 
             // Add or remove the exemption according to the command arguments
             if (action == "add") {
-                Config.WriteElement(filePath, "exemptions", e);
+                if(!Config.WriteElement(filePath, "exemptions", e)) { Errors.PrintError("Could not write to configuration file"); }
             } else if (action == "remove") {
-                Config.RemoveElement(filePath, "exemptions", e);
+                if(!Config.RemoveElement(filePath, "exemptions", e)) { Errors.PrintError("Could not write to configuration file"); }
             } else {
                 Help();
             }

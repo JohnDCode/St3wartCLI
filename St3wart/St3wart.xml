@@ -1,8 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<config>
-  <exemptions>
-    <exemption ID="001" />
-    <exemption ID="002" />
-    <exemption ID="003" />
-  </exemptions>
-</config>
+<st3wart>
+  <config>
+    <exemptions />
+  </config>
+  <logs>
+    <checks>
+      <check5de59f184a95440aaf5bf9501f355f81 Date="2025-08-22-13:12:17" File=".\Vulns\System\test.json">
+        <vuln ID="OS-001" CheckPass="True" />
+      </check5de59f184a95440aaf5bf9501f355f81>
+      <check92387433dcb94b34bffd5a5ecd08d44d Date="2025-08-22-13:12:38" File=".\Vulns\System\test.json" />
+      <check712763b21e67475eb1f3e2b3278db8c2 Date="2025-08-22-13:12:57" File=".\Vulns\System\test.json">
+        <vuln ID="OS-001" CheckPass="True" />
+      </check712763b21e67475eb1f3e2b3278db8c2>
+    </checks>
+  </logs>
+</st3wart>

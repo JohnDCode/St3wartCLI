@@ -31,12 +31,18 @@ public class CheckCommand : ICommand {
             // Get the specified file path of the vuln bank
             string filePath = args[1];
 
+            // The path to the config file
+            string configFile = Directory.GetCurrentDirectory() + "/St3wart.xml";
+
+            // Check if the configuration file has been created and create one if not
+            if (!File.Exists(configFile)) { if(!Config.CreateConfig(configFile)) { Errors.PrintError("Can not create configuration file"); return; } }
+
             // Get all vulns from the file
             Dictionary<string, Check> checks = DataHandler.VulnsFromFile(filePath);
 
             // Ensure checks populated
             if (checks == null) { Errors.PrintError("Can not retrieve vulns from JSON database"); return; }
-
+            
             // Organize checks into lists of their types
             List<PowerShellCheck> psChecks = new List<PowerShellCheck>();
             List<RegistryCheck> regChecks = new List<RegistryCheck>();
@@ -65,20 +71,31 @@ public class CheckCommand : ICommand {
             List<RegistryResult> regResults = await regTask;
             
             // Get all the exemptions from the XML config file
-            List<XElement> exceptions = Config.FetchElements(Directory.GetCurrentDirectory() + "/St3wart.xml", "exemptions");
+            List<XElement> exceptions = Config.FetchElements(configFile, "exemptions");
             List<string> exceptionIDs = new List<string>();
             foreach (XElement e in exceptions) {
                 string? id = (string?) e.Attribute("ID");
                 if (id is string idStr) { exceptionIDs.Add(idStr); }
             }
+            
+            // Get the date to log the check
+            DateTime currentTime = DateTime.Now;
+            string formattedDateTime = currentTime.ToString("yyyy-MM-dd-HH:mm:ss");
 
+            // Log the check
+            string checkName = $"check{Guid.NewGuid():N}";
+            Config.WriteElement(configFile, "checks", new XElement(checkName, new XAttribute("Date", formattedDateTime), new XAttribute("File", args[1])));
+            
             // Display info on both sets of results and log said results
             foreach(PowerShellResult psResult in psResults) {
 
                 // Ensure the vuln is not marked as an exemption
                 string? id = psResult.Check.ID;
-                if (id is string checkID) { 
+                if (id is string checkID) {
                     if (exceptionIDs.Contains(checkID)) { continue; }
+
+                    // Cache the result
+                    Config.WriteElement(configFile, checkName, new XElement("vuln", new XAttribute("ID", checkID), new XAttribute("CheckPass", psResult.CheckPass.ToString())));
                 }
 
                 // Format the result to a readable string
@@ -116,6 +133,7 @@ public class CheckCommand : ICommand {
             // Write the new section to the config file
 
         } catch {
+            Errors.PrintError("Error");
             Help();
         }
     }
@@ -133,4 +151,3 @@ public class CheckCommand : ICommand {
         Console.ResetColor();
     }
 }
-// Output the results of the check to xml and then cleanup

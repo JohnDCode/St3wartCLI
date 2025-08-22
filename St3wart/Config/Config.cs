@@ -30,7 +30,7 @@ public static class Config {
         
         try {
             // Create (with default St3wart config layout) and save the configuration file
-            var doc = new XDocument(new XElement("config", new XElement("exemptions")), new XElement("logs"));
+            var doc = new XDocument(new XElement("st3wart", new XElement("config", new XElement("exemptions")), new XElement("logs", new XElement("checks"))));
             doc.Save(filePath);
         } catch {
             return false;
@@ -59,7 +59,7 @@ public static class Config {
             if (doc == null || doc.Root == null) { return false; }
 
             // Find the section (or the first occurrence)
-            XElement? XMLSection = doc.Root.Element(section);
+            XElement? XMLSection = doc.Descendants(section).FirstOrDefault();
 
             // Check that the section was found
             if (XMLSection == null) { return false; }
@@ -97,7 +97,7 @@ public static class Config {
             if (doc == null || doc.Root == null) { return false; }
 
             // Find the section (or the first occurrence)
-            XElement? XMLSection = doc.Root.Element(section);
+            XElement? XMLSection = doc.Descendants(section).FirstOrDefault();
 
             // Check that the section was found
             if (XMLSection == null) { return false; }
@@ -117,74 +117,6 @@ public static class Config {
         } catch {
             return false;
         }
-        return true;
-    }
-    
-    
-    
-    /// <summary>
-    /// Create a section within the configuration file
-    /// </summary>
-    /// <param name="filePath">Path to the configuration file</param>
-    /// <param name="parentSection">Section to insert</param>
-    /// <param name="newSection">Element to insert to the configuration file</param>
-    /// <returns>
-    /// Success of writing the section to the config file
-    /// </returns>
-    public static bool WriteSection(string filePath, string parentSection, string newSection) {
-        
-        try {
-            // Load the XML config
-            XDocument? doc = XDocument.Load(filePath);
-
-            // Ensure the doc exists and is valid
-            if (doc == null || doc.Root == null) { return false; }
-
-            // If the parent section is root, simply add to the root element
-            if (parentSection == "root") {
-                doc.Root.Add(newSection);
-
-                // Save changes back to the file
-                doc.Save(filePath);
-
-                // Ensure the section was created
-                if (doc.Root?.Element(newSection) != null) { return true; }
-                
-            // Otherwise, look for the first occurence of the parent section and then add the new section to it
-            } else {
-                // Get the location of the parent section
-                XElement? parentSec = doc.Descendants(parentSection).FirstOrDefault();
-                
-                // If parent section is found, add the new section to it
-                if (parentSec is XElement parentXMLSec) {
-                    parentXMLSec.AddAfterSelf(new XElement(newSection));
-
-                    // Save changes back to the file
-                    doc.Save(filePath);
-                    
-                    // Ensure the section was created
-                    XElement? checkSec = doc.Descendants(parentSection).FirstOrDefault();
-                    if (checkSec?.Element(newSection) != null) { return true; }
-                }
-            }
-            
-        } catch {
-            return false;
-        }
-        return false;
-    }
-    
-    
-    
-    /// <summary>
-    /// Remove the first instance of a section from the configuration file
-    /// </summary>
-    /// <param name="filePath">Path to the configuration file</param>
-    /// <param name="section">Section to remove</param>
-    /// <returns>
-    /// Success of removing the section from the config file
-    /// </returns>
-    public static bool RemoveSection(string filePath, string section) {
         return true;
     }
     

@@ -64,6 +64,7 @@ public class VulnCommand : ICommand {
     public void Help() {
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine("St3wart Vuln");
+        Console.WriteLine("Vuln lookup to display information on any particular vuln in any database");
         Console.WriteLine("Usage: St3wart.exe vuln [OPTIONS] <JSON BANK PATH> <VULN ID>");
         Console.WriteLine("Example: St3wart.exe vuln C:/vulns.json OS-001");
         Console.ResetColor();

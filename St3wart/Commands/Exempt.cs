@@ -59,6 +59,7 @@ public class ExemptCommand : ICommand {
     public void Help() {
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine("St3wart Exempt");
+        Console.WriteLine("Exempts vulns from being checked, secured, or otherwise noted by St3wart");
         Console.WriteLine("Usage: St3wart.exe exempt [OPTIONS] <ADD/REMOVE> <VULN ID>");
         Console.WriteLine("Example: St3wart.exe exempt add OS-001");
         Console.ResetColor();

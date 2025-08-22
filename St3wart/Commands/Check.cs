@@ -1,7 +1,7 @@
 /*
 
 Stewart CLI
-/Commands/Check.cs - Check command, checks for vulns on machine and/or services
+/Commands/Check.cs - Check command, checks for deignated vulns on machine
 JohnDavid Abe 
 
 */
@@ -15,7 +15,7 @@ using System.Xml.Linq;
 
 
 /// <summary>
-/// Check command, checks for vulns on machine and/or services
+/// Check command, checks for deignated vulns on machine
 /// </summary>
 [SupportedOSPlatform("Windows")]
 public class CheckCommand : ICommand {
@@ -146,6 +146,7 @@ public class CheckCommand : ICommand {
     public void Help() {
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine("St3wart Check");
+        Console.WriteLine("Checks for deignated vulns on machine");
         Console.WriteLine("Usage: St3wart.exe check [OPTIONS] <JSON BANK PATH>");
         Console.WriteLine("Example: St3wart.exe check C:/vulns.json");
         Console.ResetColor();

@@ -33,15 +33,13 @@ public class CheckCommand : ICommand {
 
             // The path to the config file
             string configFile = Directory.GetCurrentDirectory() + "/St3wart.xml";
-
-            // Check if the configuration file has been created and create one if not
-            if (!File.Exists(configFile)) { if(!Config.CreateConfig(configFile)) { Errors.PrintError("Can not create configuration file"); return; } }
-
+            if (!File.Exists(filePath)) { Errors.PrintError("Unable to find configuration file"); Help(); return; }
+            
             // Get all vulns from the file
             Dictionary<string, Check> checks = DataHandler.VulnsFromFile(filePath);
 
             // Ensure checks populated
-            if (checks == null) { Errors.PrintError("Can not retrieve vulns from JSON database"); return; }
+            if (checks == null) { Errors.PrintError("Can not retrieve vulns from JSON database");Help(); return; }
             
             // Organize checks into lists of their types
             List<PowerShellCheck> psChecks = new List<PowerShellCheck>();
@@ -54,10 +52,22 @@ public class CheckCommand : ICommand {
                 }
             }
 
+            // Determine the number of PS instances to spawn (very jank, note: update this)
+            int numInstances;
+            if (psChecks.Count() < 5) {
+                numInstances = 1;
+            } else if (psChecks.Count() < 15) {
+                numInstances = 5;
+            } else {
+                numInstances = 10;
+            }
+                
+
             // Start the PS pool
-            using var pool = new PowerShellPool(poolSize: 2);
+            using var pool = new PowerShellPool(poolSize: numInstances);
             if (!await pool.InitializeAsync()) {
-                Console.WriteLine("Failed to initialize PowerShell pool");
+                Errors.PrintError("Failed to initialize PowerShell pool");
+                Help();
                 return;
             }
 
@@ -73,9 +83,11 @@ public class CheckCommand : ICommand {
             // Get all the exemptions from the XML config file
             List<XElement> exceptions = Config.FetchElements(configFile, "exemptions");
             List<string> exceptionIDs = new List<string>();
-            foreach (XElement e in exceptions) {
-                string? id = (string?) e.Attribute("ID");
-                if (id is string idStr) { exceptionIDs.Add(idStr); }
+            if (exceptions == null) { Errors.PrintError("Unable to retrieve exemptions, logging all checks"); } else {
+                foreach (XElement e in exceptions) {
+                    string? id = (string?) e.Attribute("ID");
+                    if (id is string idStr) { exceptionIDs.Add(idStr); }
+                }
             }
             
             // Get the date to log the check
@@ -86,51 +98,39 @@ public class CheckCommand : ICommand {
             string checkName = $"check{Guid.NewGuid():N}";
             Config.WriteElement(configFile, "checks", new XElement(checkName, new XAttribute("Date", formattedDateTime), new XAttribute("File", args[1])));
             
-            // Display info on both sets of results and log said results
-            foreach(PowerShellResult psResult in psResults) {
+
+            // Display info on both sets of results and log each result
+            List<object> combinedResults = [.. psResults, .. regResults];
+            foreach (object objResult in combinedResults) {
+
+                // Get the details of the check
+                string? id = null;
+                bool? checkPass = null;
+                string? details = null;
+                if (objResult is PowerShellResult psResult) {
+                    id = psResult.Check.ID; checkPass = psResult.CheckPass; details = psResult.Print();
+                } else if (objResult is RegistryResult regResult) {
+                    id = regResult.Check.ID; checkPass = regResult.CheckPass; details = regResult.Print();
+                } else { continue; }
+        
+                // Ensure the details populated
+                if (id == null || checkPass == null || details == null) { continue; }
 
                 // Ensure the vuln is not marked as an exemption
-                string? id = psResult.Check.ID;
-                if (id is string checkID) {
-                    if (exceptionIDs.Contains(checkID)) { continue; }
+                if (exceptionIDs.Contains(id)) { continue; }
 
-                    // Cache the result
-                    Config.WriteElement(configFile, checkName, new XElement("vuln", new XAttribute("ID", checkID), new XAttribute("CheckPass", psResult.CheckPass.ToString())));
-                }
-
-                // Format the result to a readable string
-                string strResult = psResult.Print();
+                // Cache the result of the result
+                Config.WriteElement(configFile, checkName, new XElement("vuln", new XAttribute("ID", id), new XAttribute("CheckPass", checkPass)));
 
                 // Set the output color based on if the check passed
-                if (psResult.CheckPass == true) { Console.ForegroundColor = ConsoleColor.Green; } else { Console.ForegroundColor = ConsoleColor.Red; }
+                if (checkPass == true) { Console.ForegroundColor = ConsoleColor.Green; } else { Console.ForegroundColor = ConsoleColor.Red; }
 
                 // Write the output to the console
-                Console.WriteLine(strResult);
-            }
-
-            foreach(RegistryResult regResult in regResults) {
-
-                // Ensure the vuln is not marked as an exemption
-                string? id = regResult.Check.ID;
-                if (id is string checkID) {
-                    if (exceptionIDs.Contains(checkID)) { continue; }
-                }
-                
-                // Format the result to a readable string
-                string strResult = regResult.Print();
-
-                // Set the output color based on if the check passed
-                if (regResult.CheckPass == true) { Console.ForegroundColor = ConsoleColor.Green; } else { Console.ForegroundColor = ConsoleColor.Red; }
-
-                // Write the output to the console
-                Console.WriteLine(strResult);
+                Console.WriteLine(details);
             }
 
             // Reset the foreground color after printing all of the vulns
             Console.ResetColor();
-            
-            
-            // Write the new section to the config file
 
         } catch {
             Errors.PrintError("Error");

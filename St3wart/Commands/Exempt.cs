@@ -26,9 +26,9 @@ public class ExemptCommand : ICommand {
 
         try {
 
-            // Check if the configuration file has been created and create one if not
+            // Check if the configuration file has been created
             string filePath = Directory.GetCurrentDirectory() + "/St3wart.xml";
-            if (!File.Exists(filePath)) { if(!Config.CreateConfig(filePath)) { Errors.PrintError("Can not create configuration file"); return; } }
+            if (!File.Exists(filePath)) { Errors.PrintError("Unable to find configuration file"); Help(); return; }
 
             // Create the exception element corresponding to the exempt request
             XElement e = new XElement("exemption", new XAttribute("ID", args[2]));
@@ -38,14 +38,15 @@ public class ExemptCommand : ICommand {
 
             // Add or remove the exemption according to the command arguments
             if (action == "add") {
-                if(!Config.WriteElement(filePath, "exemptions", e)) { Errors.PrintError("Could not write to configuration file"); }
+                if(!Config.WriteElement(filePath, "exemptions", e)) { Errors.PrintError("Could not write to configuration file"); Help(); }
             } else if (action == "remove") {
-                if(!Config.RemoveElement(filePath, "exemptions", e)) { Errors.PrintError("Could not write to configuration file"); }
+                if(!Config.RemoveElement(filePath, "exemptions", e)) { Errors.PrintError("Could not write to configuration file"); Help(); }
             } else {
                 Help();
             }
             
         } catch {
+            Errors.PrintError("Error");
             Help();
         }
     }
@@ -58,7 +59,7 @@ public class ExemptCommand : ICommand {
     public void Help() {
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine("St3wart Exempt");
-        Console.WriteLine("Usage: St3wart.exe exempt [OPTIONS] <ACTION> <VULN ID>");
+        Console.WriteLine("Usage: St3wart.exe exempt [OPTIONS] <ADD/REMOVE> <VULN ID>");
         Console.WriteLine("Example: St3wart.exe exempt add OS-001");
         Console.ResetColor();
     }

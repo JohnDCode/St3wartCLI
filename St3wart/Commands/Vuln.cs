@@ -28,13 +28,13 @@ public class VulnCommand : ICommand {
             Dictionary<string, Check> checks = DataHandler.VulnsFromFile(filePath);
 
             // Ensure checks populated
-            if (checks == null) { Errors.PrintError("Can not retrieve vulns from JSON database"); return; }
+            if (checks.Count() == 0) { Errors.PrintError("Unable to retrieve vulns from JSON database"); Help(); return; }
 
             // Find the specific check by looking up the ID in the bank
             Check vuln = checks[args[2]];
 
             // Check if vuln was found
-            if (vuln == null) { Errors.PrintError($"Can not retrieve vuln {args[2]} from JSON database"); return; }
+            if (vuln == null) { Errors.PrintError($"Can not retrieve vuln from JSON database"); Help(); return; }
             
             // Set the text color for cool output of the vuln
             Console.ForegroundColor = ConsoleColor.Green;
@@ -45,12 +45,13 @@ public class VulnCommand : ICommand {
             } else if (vuln is PowerShellCheck psCheck) {
                 Console.WriteLine(psCheck.Print());
             } else {
-                Errors.PrintError("Unknown check type");
+                Errors.PrintError("Unknown check type"); Help();
             }
 
             // Reset the foreground color
             Console.ResetColor();
         } catch {
+            Errors.PrintError("Error");
             Help();
         }
     }

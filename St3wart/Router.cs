@@ -13,10 +13,10 @@ using System.Runtime.Versioning;
 
 
 
-[SupportedOSPlatform("Windows")]
 /// <summary>
 /// Delegates commands to the appropriate classes
 /// </summary>
+[SupportedOSPlatform("Windows")]
 public static class Router {
 
     /// <summary>
@@ -36,9 +36,12 @@ public static class Router {
         // Extract inital command (first argument in executable call)
         string command = args[0].ToLower();
 
-        // Get the command (must follow the ICommand interface) and delegate appropriately
+        // Create the config file if none is found
+        string filePath = Directory.GetCurrentDirectory() + "/St3wart.xml";
+        if (!File.Exists(filePath)) { if(!Config.CreateConfig(filePath)) { Errors.PrintError("Can not create configuration file"); return; } }
+
+        // Get the command and delegate appropriately
         ICommand? cmd = command switch {
-            //"a" => new ACommand(),
             "check" => new CheckCommand(),
             "exempt" => new ExemptCommand(),
             "log" => new LogCommand(),
@@ -53,7 +56,9 @@ public static class Router {
 
         // If no command can be delegated, command is unknown
         if (cmd == null) {
-            Console.WriteLine($"Unknown command: {command}");
+            Errors.PrintError("Unknown command");
+            ICommand helpCmd = new HelpCommand();
+            await helpCmd.Execute(args);
             return;
         }
 

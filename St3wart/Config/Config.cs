@@ -30,7 +30,7 @@ public static class Config {
         
         try {
             // Create (with default St3wart config layout) and save the configuration file
-            var doc = new XDocument(new XElement("config", new XElement("exemptions")));
+            var doc = new XDocument(new XElement("config", new XElement("exemptions")), new XElement("logs"));
             doc.Save(filePath);
         } catch {
             return false;
@@ -143,6 +143,12 @@ public static class Config {
             // If the parent section is root, simply add to the root element
             if (parentSection == "root") {
                 doc.Root.Add(newSection);
+
+                // Save changes back to the file
+                doc.Save(filePath);
+
+                // Ensure the section was created
+                if (doc.Root?.Element(newSection) != null) { return true; }
                 
             // Otherwise, look for the first occurence of the parent section and then add the new section to it
             } else {
@@ -152,22 +158,26 @@ public static class Config {
                 // If parent section is found, add the new section to it
                 if (parentSec is XElement parentXMLSec) {
                     parentXMLSec.AddAfterSelf(new XElement(newSection));
+
+                    // Save changes back to the file
+                    doc.Save(filePath);
+                    
+                    // Ensure the section was created
+                    XElement? checkSec = doc.Descendants(parentSection).FirstOrDefault();
+                    if (checkSec?.Element(newSection) != null) { return true; }
                 }
             }
-
-            // Save changes back to the file
-            doc.Save(filePath);
             
         } catch {
             return false;
         }
-        return true;
+        return false;
     }
     
     
     
     /// <summary>
-    /// Remove a section from the configuration file
+    /// Remove the first instance of a section from the configuration file
     /// </summary>
     /// <param name="filePath">Path to the configuration file</param>
     /// <param name="section">Section to remove</param>

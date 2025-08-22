@@ -9,7 +9,6 @@ JohnDavid Abe
 
 
 // Packages
-using System.ComponentModel.Design.Serialization;
 using System.Runtime.Versioning;
 using System.Xml.Linq;
 
@@ -94,6 +93,12 @@ public class CheckCommand : ICommand {
 
             foreach(RegistryResult regResult in regResults) {
 
+                // Ensure the vuln is not marked as an exemption
+                string? id = regResult.Check.ID;
+                if (id is string checkID) {
+                    if (exceptionIDs.Contains(checkID)) { continue; }
+                }
+                
                 // Format the result to a readable string
                 string strResult = regResult.Print();
 
@@ -106,6 +111,9 @@ public class CheckCommand : ICommand {
 
             // Reset the foreground color after printing all of the vulns
             Console.ResetColor();
+            
+            
+            // Write the new section to the config file
 
         } catch {
             Help();
@@ -117,8 +125,7 @@ public class CheckCommand : ICommand {
     /// <summary>
     /// Displays help information on the command
     /// </summary>
-    public void Help()
-    {
+    public void Help() {
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine("St3wart Check");
         Console.WriteLine("Usage: St3wart.exe check [OPTIONS] <JSON BANK PATH>");

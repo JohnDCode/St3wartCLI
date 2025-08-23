@@ -9,6 +9,7 @@ JohnDavid Abe
 
 
 // Packages
+using System.Data.Common;
 using System.Runtime.Versioning;
 
 
@@ -113,82 +114,47 @@ public static class FileRunner {
     /// <returns>The ID and success of the remediation attempt</returns>
     private async static Task<(string, bool)> SecureFile(FileCheck check) {
         
-        // Define a blank result object to return if check does not complete
-        FileResult blank = new FileResult {
-            Check = check,
-            CheckPass = false,
-            Success = false
-        };
-        
+        // Get the ID of the check
+        string id = "";
+        if (check.ID is string temp) { id = temp; } else { return (id, false); }
+
         try {
 
-            // Ensure the file path exists (if the file path does not exist and the operator is a positive operator, the check passes -->
-                // If text within a file results in a finding, the file not existing results in a non finding and a successful check
+            // Ensure check data populated
+            if (check.Path == null || check.SecureText == null || check.FindData == null) { return (id, false); }
+
             
-            // Also check for Exists and NotExists operators here (crazy logic here)
+            // If the operator is exists, delete the file
+            if (check.Operator == "Exists") {
+                // Check if the file exists and then delete
+                if (File.Exists(check.Path)) { File.Delete(check.Path); } else { return (id, false); }
             
-            if (!File.Exists(check.Path)) {
-                
-                if (check.Operator == "Exists" || check.Operator == "Contains" || check.Operator == "EqualTo") {
-                    blank.CheckPass = true;
-                    blank.Success = true;
-                } else if (check.Operator == "NotExists") {
-                    blank.Success = true;
-                }
-                return blank;
-                
+            // If the operator is not exists, create the file
+            } else if (check.Operator == "NotExists") {
+                // Check if the file exists and then create it
+                if (!File.Exists(check.Path)) { File.Create(check.Path); } else { return (id, false); }
+
+                // Write the secure data to the file
+                File.WriteAllText(check.Path, check.SecureText);
+
+            // If just typical check, just replace the insecure data with secure data
             } else {
-                if (check.Operator == "Exists") {
-                    blank.Success = true;
-                    return blank;
-                } else if (check.Operator == "NotExists") {
-                    blank.CheckPass = true;
-                    blank.Success = true;
-                    return blank;
-                }
-            }
-
-            // Read the data from the file
-            string? data = File.ReadAllText(check.Path);
-
-            // Ensure data from file and data to compare to populated
-            if (data == null || check.FindData == null) { return blank; }
-
-            // Define if the check passed or not
-            bool checkPass = false;
-
-            // Test the check pass based on the specific operator
-            switch (check.Operator) {
-                // Operators greater than and less than can not apply in file checks (use powershell for more advanced file checks)
-                case "GreaterThan":
-                case "LessThan":
-                    return blank;
-                case "EqualTo":
-                    checkPass = !(data == check.FindData);
-                    break;
-                case "Contains":
-                    checkPass = !data.Contains(check.FindData);
-                    break;
-                case "NotEqualTo":
-                    checkPass = data == check.FindData;
-                    break;
-                case "NotContains":
-                    checkPass = data.Contains(check.FindData);
-                    break;
-                default:
-                    break;
-            }
+                string? data = File.ReadAllText(check.Path);
                 
-            // Construct a struct to hold all relevant info of the command and return
-            return new FileResult {
-                Check = check,
-                CheckPass = checkPass,
-                Success = true
-            };
+                // Ensure data from file and data to compare to populated
+                if (data == null) { return (id, false); }
+
+                // Replace all occurrences of the insecure text with secure text and save back to file
+                string updatedData = data.Replace(check.FindData, check.SecureText);
+                File.WriteAllText(check.Path, updatedData);
+            }
+
+            // If no issues, return as successful remediation
+            return (id, true);
         }
 
         // If the value did not populate properly, return blank FileResult
-        catch (Exception) { return blank; }
+        catch (Exception) { return (id, false); }
     }
 
 

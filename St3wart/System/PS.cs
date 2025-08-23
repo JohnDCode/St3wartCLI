@@ -1,7 +1,7 @@
 /*
 
 Stewart CLI
-/System/PS.cs - Handles batch PowerShell requests
+/System/PS.cs - Handles batch PowerShell checks
 JohnDavid Abe 
 
 */
@@ -140,7 +140,7 @@ public class PowerShellInstance : IDisposable {
             var errors = new List<string>();
 
             // Define a blank result object to return if check does not complete
-            PowerShellResult result = new PowerShellResult {
+            PowerShellResult blank = new PowerShellResult {
                 Check = check,
                 Output = "",
                 Errors = new List<string>(),
@@ -150,7 +150,7 @@ public class PowerShellInstance : IDisposable {
             };
             
             // Ensure streams populated
-            if (_outputReader == null || _errorReader == null) { return result; }
+            if (_outputReader == null || _errorReader == null) { return blank; }
 
             try {
                 
@@ -186,7 +186,7 @@ public class PowerShellInstance : IDisposable {
                 string outputStr = output.ToString().TrimEnd('\r', '\n');
 
                 // Ensure the output and the data to compare to are populated
-                if (outputStr == null || check.FindData == null) { return result; }
+                if (outputStr == null || check.FindData == null) { return blank; }
 
 
                 // Test the check pass based on the specific operator and PowerShell output
@@ -228,7 +228,7 @@ public class PowerShellInstance : IDisposable {
             }
 
             // If the check failed, return blank result
-            catch (Exception) { return result; }
+            catch (Exception) { return blank; }
         }
 
         finally {

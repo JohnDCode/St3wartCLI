@@ -1,7 +1,7 @@
 /*
 
 Stewart CLI
-/System/Reg.cs - Handles batch Registry requests
+/System/Reg.cs - Handles batch Registry checks
 JohnDavid Abe 
 
 */
@@ -28,7 +28,7 @@ public static class RegistryRunner {
     private static RegistryResult CheckRegistry(RegistryCheck check) {
         
         // Define a blank result object to return if check does not complete
-        RegistryResult result = new RegistryResult {
+        RegistryResult blank = new RegistryResult {
             Check = check,
             Data = "",
             CheckPass = false,
@@ -38,11 +38,11 @@ public static class RegistryRunner {
         try {
 
             // Ensure check and value exists in Check
-            if (check.Key == null || check.Value == null) { return result; }
+            if (check.Key == null || check.Value == null) { return blank; }
 
             // Split the key into the root key and its subkey
             int firstSlash = check.Key.IndexOf(@"\");
-            if (firstSlash == -1) { return result; }
+            if (firstSlash == -1) { return blank; }
 
             // Seperate the key into the base and subkey
             string baseKey = check.Key.Substring(0, firstSlash);
@@ -60,20 +60,20 @@ public static class RegistryRunner {
                 baseRk = Registry.Users;
             } else if (baseKey.Contains("HKEY_CURRENT_CONFIG") || baseKey.Contains("HKCC")) {
                 baseRk = Registry.CurrentConfig;
-            } else { return result; }
+            } else { return blank; }
 
             // Check that the base key opened
-            if (baseRk == null) { return result; }
+            if (baseRk == null) { return blank; }
 
             // Open the subkey
             RegistryKey? subRk = baseRk.OpenSubKey(subKey);
 
             // Check that the subkey opened
-            if (subRk == null) { return result; }
+            if (subRk == null) { return blank; }
 
             // Access the value within the subkey
             var value = subRk.GetValue(check.Value);
-            if (value == null) { return result; }
+            if (value == null) { return blank; }
 
             // Close the base and sub key
             baseRk.Close();
@@ -89,7 +89,7 @@ public static class RegistryRunner {
                 string? strValue = value.ToString();
 
                 // Ensure the value and the data to compare to are populated
-                if (strValue == null || check.FindData == null) { return result; }
+                if (strValue == null || check.FindData == null) { return blank; }
 
                 // Test the check pass based on the specific operator
                 switch (check.Operator) {
@@ -126,9 +126,9 @@ public static class RegistryRunner {
             
             
             // If the value did not populate properly, return blank RegistryResult
-            } else { return result; }
+            } else { return blank; }
         }
-        catch (Exception) { return result; }
+        catch (Exception) { return blank; }
     }
 
 
@@ -137,7 +137,7 @@ public static class RegistryRunner {
     /// Executes batch Registry checks
     /// </summary>
     /// <param name="checks">The list of Registry checks to execute</param>
-    /// <returns>A list of Registry results</returns>
+    /// <returns>A list of RegistryResults</returns>
     public static List<RegistryResult> ExecuteRegistryChecks(List<RegistryCheck> checks) {
 
         // Loop through the checks, perform each, and add the result to the list

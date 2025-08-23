@@ -180,15 +180,78 @@ public static class RegistryRunner {
         string id = "";
         if (check.ID is string temp) { id = temp; } else { return (id, false); }
         
+        
         try {
 
-            // Ensure check and value exists in Check and the secure data to set value to exists
+            // Ensure check data exists
             if (check.Key == null || check.Value == null || check.SecureValue == null) { return (id, false); }
+            
+            // Split the key into the root key and its subkey
+            int firstSlash = check.Key.IndexOf(@"\");
+            if (firstSlash == -1) { return (id, false); }
 
-            // Write to the registry
-            Registry.SetValue(check.Key, check.Value, check.SecureValue);
+            // Seperate the key into the base and subkey
+            string baseKey = check.Key.Substring(0, firstSlash);
+            string subKey = check.Key.Substring(firstSlash + 1);
 
-            // Return the result (if nothing has been caught, write successful)
+            // Determine the base key and load accordingly (allows for abbreviation in JSON)
+            RegistryKey? baseRk;
+            if (baseKey.Contains("HKEY_CLASSES_ROOT") || baseKey.Contains("HKCR")) {
+                baseRk = Registry.ClassesRoot;
+            } else if (baseKey.Contains("HKEY_CURRENT_USER") || baseKey.Contains("HKCU")) {
+                baseRk = Registry.CurrentUser;
+            } else if (baseKey.Contains("HKEY_LOCAL_MACHINE") || baseKey.Contains("HKLM")) {
+                baseRk = Registry.LocalMachine;
+            } else if (baseKey.Contains("HKEY_USERS") || baseKey.Contains("HKU")) {
+                baseRk = Registry.Users;
+            } else if (baseKey.Contains("HKEY_CURRENT_CONFIG") || baseKey.Contains("HKCC")) {
+                baseRk = Registry.CurrentConfig;
+            } else { return (id, false); }
+
+            // Check that the base key opened
+            if (baseRk == null) { return (id, false); }
+
+
+            // If the operator is exists, delete the value
+            if (check.Operator == "Exists") {
+                // Open the subkey
+                RegistryKey? subRk = baseRk.OpenSubKey(subKey);
+                if (subRk == null) { return (id, false); }
+
+                // Delete the value
+                subRk.DeleteValue(check.Value);
+
+                // Close the subkey
+                subRk.Close();
+                
+            } else if (check.Operator == "NotExists") {
+                // Open the subkey, create it if can't find it
+                RegistryKey? subRk = baseRk.OpenSubKey(subKey);
+                if (subRk == null) {
+                    baseRk.CreateSubKey(subKey);
+
+                    // Ensure it created, if not return failed remediation attempt
+                    subRk = baseRk.OpenSubKey(subKey);
+                    if (subRk == null) { return (id, false); }
+                }
+                
+                // Write the value to the key
+                Registry.SetValue(check.Key, check.Value, check.SecureValue);
+
+                // Close the subkey
+                subRk.Close();
+
+
+            } else {
+                // If just typical value check, write the proper value to it
+                Registry.SetValue(check.Key, check.Value, check.SecureValue);
+            }
+
+            // Close the base key
+            baseRk.Close();
+
+
+            // Return the result (if nothing has been caught, reg operation successful)
             return (id, true);
         }
         catch (Exception) { return (id, false); }

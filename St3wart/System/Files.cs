@@ -103,6 +103,93 @@ public static class FileRunner {
         // If the value did not populate properly, return blank FileResult
         catch (Exception) { return blank; }
     }
+    
+    
+    
+    /// <summary>
+    /// Attempts to remediate a single File check
+    /// </summary>
+    /// <param name="check">The file check to remediate</param>
+    /// <returns>The ID and success of the remediation attempt</returns>
+    private async static Task<(string, bool)> SecureFile(FileCheck check) {
+        
+        // Define a blank result object to return if check does not complete
+        FileResult blank = new FileResult {
+            Check = check,
+            CheckPass = false,
+            Success = false
+        };
+        
+        try {
+
+            // Ensure the file path exists (if the file path does not exist and the operator is a positive operator, the check passes -->
+                // If text within a file results in a finding, the file not existing results in a non finding and a successful check
+            
+            // Also check for Exists and NotExists operators here (crazy logic here)
+            
+            if (!File.Exists(check.Path)) {
+                
+                if (check.Operator == "Exists" || check.Operator == "Contains" || check.Operator == "EqualTo") {
+                    blank.CheckPass = true;
+                    blank.Success = true;
+                } else if (check.Operator == "NotExists") {
+                    blank.Success = true;
+                }
+                return blank;
+                
+            } else {
+                if (check.Operator == "Exists") {
+                    blank.Success = true;
+                    return blank;
+                } else if (check.Operator == "NotExists") {
+                    blank.CheckPass = true;
+                    blank.Success = true;
+                    return blank;
+                }
+            }
+
+            // Read the data from the file
+            string? data = File.ReadAllText(check.Path);
+
+            // Ensure data from file and data to compare to populated
+            if (data == null || check.FindData == null) { return blank; }
+
+            // Define if the check passed or not
+            bool checkPass = false;
+
+            // Test the check pass based on the specific operator
+            switch (check.Operator) {
+                // Operators greater than and less than can not apply in file checks (use powershell for more advanced file checks)
+                case "GreaterThan":
+                case "LessThan":
+                    return blank;
+                case "EqualTo":
+                    checkPass = !(data == check.FindData);
+                    break;
+                case "Contains":
+                    checkPass = !data.Contains(check.FindData);
+                    break;
+                case "NotEqualTo":
+                    checkPass = data == check.FindData;
+                    break;
+                case "NotContains":
+                    checkPass = data.Contains(check.FindData);
+                    break;
+                default:
+                    break;
+            }
+                
+            // Construct a struct to hold all relevant info of the command and return
+            return new FileResult {
+                Check = check,
+                CheckPass = checkPass,
+                Success = true
+            };
+        }
+
+        // If the value did not populate properly, return blank FileResult
+        catch (Exception) { return blank; }
+    }
 
 
 
@@ -124,6 +211,36 @@ public static class FileRunner {
             try {
                 // Get the results of this check
                 return await CheckFile(check);
+            }
+
+            // Release the Semaphore and allow it to move to the next task
+            finally { semaphore.Release(); }
+        });
+
+        // Return the results of each check as a list
+        return (await Task.WhenAll(tasks)).ToList();
+    }
+    
+    
+    
+    /// <summary>
+    /// Executes batch file remediation attempts
+    /// </summary>
+    /// <param name="checks">The list of file checks to remediate</param>
+    /// <returns>A list of ID and success tupples for each remediation attempt</returns>
+    public async static Task<List<(string, bool)>> ExecuteFileSecure(List<FileCheck> checks, int poolSize) {
+
+        // Create the Semaphore to handle concurrency
+        var semaphore = new SemaphoreSlim(poolSize, poolSize);
+
+        // Run all the tasks with the Sempahore
+        var tasks = checks.Select(async check => {
+
+            // Enter the Semaphore
+            await semaphore.WaitAsync();
+            try {
+                // Get the results of this check
+                return await SecureFile(check);
             }
 
             // Release the Semaphore and allow it to move to the next task

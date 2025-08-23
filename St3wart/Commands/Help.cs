@@ -14,21 +14,21 @@ public class HelpCommand : ICommand
     public async Task Execute(string[] args) { Help(); } 
     public void Help() { 
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("St3wart - Simplifying Systems Management\n");
-        Console.WriteLine("A general purpose Windows security auditing tool");
+        Console.WriteLine("St3wart - Simplifying Systems Management");
+        Console.WriteLine("A general purpose Windows security auditing tool\n");
 
-        Console.WriteLine("Usage: St3wart.exe <COMMAND>");
+        Console.WriteLine("Usage: St3wart.exe <COMMAND>\n");
+
         Console.WriteLine("Commands: ");
-        Console.WriteLine("check");
-        Console.WriteLine("exempt");
-        Console.WriteLine("help");
-        Console.WriteLine("log");
-        Console.WriteLine("report");
-        Console.WriteLine("restore");
-        Console.WriteLine("schedule");
-        Console.WriteLine("secure");
-        Console.WriteLine("snap");
-        Console.WriteLine("vuln");
+        Console.WriteLine(" check");
+        Console.WriteLine(" exempt");
+        Console.WriteLine(" help");
+        Console.WriteLine(" report");
+        Console.WriteLine(" restore");
+        Console.WriteLine(" schedule");
+        Console.WriteLine(" secure");
+        Console.WriteLine(" snap");
+        Console.WriteLine(" vuln");
         Console.ResetColor();
     }
 }

@@ -33,3 +33,10 @@ class Program {
         await Router.Route(args);
     }
 }
+// Implement file checks, add concurrency for all types of checks (Friday)
+// Impleemnt secure command (Friday)
+// Implement schedule command (Saturday)
+// Implement Snap and Restore commands (generate a seperate xml file for those backups, idk how I want this to actually function yet through) (Saturday)
+// Implement report command (Saturday)
+// Make some json (Onward)
+// Blog post (Onward)

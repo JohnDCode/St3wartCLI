@@ -44,7 +44,6 @@ public static class Router {
         ICommand? cmd = command switch {
             "check" => new CheckCommand(),
             "exempt" => new ExemptCommand(),
-            "log" => new LogCommand(),
             "report" => new ReportCommand(),
             "restore" => new RestoreCommand(),
             "schedule" => new ScheduleCommand(),

@@ -171,90 +171,67 @@
 
   {
     "ID": "TEST-015",
-    "Description": "File contains test",
+    "Description": "SSH Server Config File Disallows Empty Passwords",
 
     "CheckType": "File",
-    "Path": "C:/config.xml",
-    "SecureText": "Good Good",
-    "FindData": "Bad Bad",
-    "Operator": "Contains"
+    "Path": "C:/ProgramData/ssh/sshd_config",
+    "SecureText": "SHOULD BE A LOT MORE THAN 1 SETTING",
+    "FindData": "THIS ONE SETTING",
+    "Operator": "EqualTo"
   },
 
   {
     "ID": "TEST-016",
-    "Description": "File contains test",
+    "Description": "SSH Server Config File Disallows Empty Passwords",
 
     "CheckType": "File",
-    "Path": "C:/config.xml",
-    "SecureText": "Good Good",
-    "FindData": "Bad Bad",
+    "Path": "C:/ProgramData/ssh/sshd_config",
+    "SecureText": "PermitEmptyPasswords no",
+    "FindData": "PermitEmptyPasswords yes",
     "Operator": "Contains"
-  }
+  },
 
   {
     "ID": "TEST-017",
-    "Description": "File contains test",
+    "Description": "SSH Server Config File Disallows Empty Passwords (this one won't pass)",
 
     "CheckType": "File",
-    "Path": "C:/config.xml",
-    "SecureText": "Good Good",
-    "FindData": "Bad Bad",
-    "Operator": "Contains"
+    "Path": "C:/ProgramData/ssh/sshd_config",
+    "SecureText": "THIS SHOULD BE THE WHOLE FILE",
+    "FindData": "THIS IS THE WHOLE FILE",
+    "Operator": "NotEqualTo"
   },
 
   {
     "ID": "TEST-018",
-    "Description": "File contains test",
+    "Description": "SSH Server Config File Disallows Empty Passwords",
 
     "CheckType": "File",
-    "Path": "C:/config.xml",
-    "SecureText": "Good Good",
-    "FindData": "Bad Bad",
-    "Operator": "Contains"
+    "Path": "C:/ProgramData/ssh/sshd_config",
+    "SecureText": "PermitEmptyPasswords no",
+    "FindData": "PermitEmptyPasswords no",
+    "Operator": "NotContains"
   },
 
   {
     "ID": "TEST-019",
-    "Description": "File contains test",
+    "Description": "SSH Server Config File Disallows Empty Passwords",
 
     "CheckType": "File",
-    "Path": "C:/config.xml",
-    "SecureText": "Good Good",
-    "FindData": "Bad Bad",
-    "Operator": "Contains"
+    "Path": "C:/ProgramData/ssh/sshd_configxd",
+    "SecureText": "",
+    "FindData": "",
+    "Operator": "Exists"
   },
 
   {
     "ID": "TEST-020",
-    "Description": "File contains test",
+    "Description": "SSH Server Config File Disallows Empty Passwords",
 
     "CheckType": "File",
-    "Path": "C:/config.xml",
-    "SecureText": "Good Good",
-    "FindData": "Bad Bad",
-    "Operator": "Contains"
-  },
-
-  {
-    "ID": "TEST-021",
-    "Description": "File contains test",
-
-    "CheckType": "File",
-    "Path": "C:/config.xml",
-    "SecureText": "Good Good",
-    "FindData": "Bad Bad",
-    "Operator": "Contains"
-  },
-
-  {
-    "ID": "TEST-022",
-    "Description": "File contains test",
-
-    "CheckType": "File",
-    "Path": "C:/config.xml",
-    "SecureText": "Good Good",
-    "FindData": "Bad Bad",
-    "Operator": "Contains"
-  },
-
+    "Path": "C:/ProgramData/ssh/sshd_config",
+    "SecureText": "",
+    "FindData": "",
+    "Operator": "NotExists"
+  }
 ]

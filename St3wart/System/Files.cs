@@ -24,7 +24,7 @@ public static class FileRunner {
     /// </summary>
     /// <param name="check">The file check to execute</param>
     /// <returns>The result of the check with the retrieved data and the findings of the check</returns>
-    private static FileResult CheckFile(FileCheck check) {
+    private async static Task<FileResult> CheckFile(FileCheck check) {
         
         // Define a blank result object to return if check does not complete
         FileResult blank = new FileResult {
@@ -110,17 +110,28 @@ public static class FileRunner {
     /// Executes batch file checks
     /// </summary>
     /// <param name="checks">The list of file checks to execute</param>
-    /// <returns>A list of FileResults</returns>
-    public static List<FileResult> ExecuteFileChecks(List<FileCheck> checks) {
+    /// <returns>A list of FileResults from the checks</returns>
+    public async static Task<List<FileResult>> ExecuteFileChecks(List<FileCheck> checks, int poolSize) {
 
-        // Loop through the checks, perform each, and add the result to the list
-        List<FileResult> results = new List<FileResult>();
-        foreach (FileCheck check in checks) {
-            results.Add(CheckFile(check));
-        }
+        // Create the Semaphore to handle concurrency
+        var semaphore = new SemaphoreSlim(poolSize, poolSize);
 
-        // Return the list of results
-        return results;
+        // Run all the tasks with the Sempahore
+        var tasks = checks.Select(async check => {
+
+            // Enter the Semaphore
+            await semaphore.WaitAsync();
+            try {
+                // Get the results of this check
+                return await CheckFile(check);
+            }
+
+            // Release the Semaphore and allow it to move to the next task
+            finally { semaphore.Release(); }
+        });
+
+        // Return the results of each check as a list
+        return (await Task.WhenAll(tasks)).ToList();
     }
 }
 

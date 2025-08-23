@@ -173,7 +173,7 @@ public static class RegistryRunner {
     /// Executes batch Registry checks
     /// </summary>
     /// <param name="checks">The list of Registry checks to execute</param>
-    /// <returns>A list of RegistryResults</returns>
+    /// <returns>A list of RegistryResults from the checks</returns>
     public static List<RegistryResult> ExecuteRegistryChecks(List<RegistryCheck> checks) {
 
         // Loop through the checks, perform each, and add the result to the list

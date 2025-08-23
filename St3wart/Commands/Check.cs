@@ -67,7 +67,7 @@ public class CheckCommand : ICommand {
                 
 
             // Start the PS pool
-            using var pool = new PowerShellPool(poolSize: numInstances);
+            using var pool = new PowerShellPool(poolSize: 1);
             if (!await pool.InitializeAsync()) {
                 Errors.PrintError("Failed to initialize PowerShell pool");
                 Help();
@@ -77,7 +77,7 @@ public class CheckCommand : ICommand {
             // Run the two types of checks concurrently
             Task<List<PowerShellResult>> psTask = pool.ExecuteCommandsBatchAsync(psChecks);
             Task<List<RegistryResult>> regTask = Task.Run(() => RegistryRunner.ExecuteRegistryChecks(regChecks));
-            Task<List<FileResult>> fileTask = Task.Run(() => FileRunner.ExecuteFileChecks(fileChecks));
+            Task<List<FileResult>> fileTask = FileRunner.ExecuteFileChecks(fileChecks, 1);
             await Task.WhenAll(psTask, regTask, fileTask);
 
             // Extract the reuslts of both sets of checks
@@ -112,12 +112,13 @@ public class CheckCommand : ICommand {
                 string? id = null;
                 bool? checkPass = null;
                 string? details = null;
+                bool? success = null;
                 if (objResult is PowerShellResult psResult) {
-                    id = psResult.Check.ID; checkPass = psResult.CheckPass; details = psResult.Print();
+                    id = psResult.Check.ID; checkPass = psResult.CheckPass; details = psResult.Print(); success = psResult.Success;
                 } else if (objResult is RegistryResult regResult) {
-                    id = regResult.Check.ID; checkPass = regResult.CheckPass; details = regResult.Print();
+                    id = regResult.Check.ID; checkPass = regResult.CheckPass; details = regResult.Print(); success = regResult.Success;
                 } else if (objResult is FileResult fileResult) {
-                    id = fileResult.Check.ID; checkPass = fileResult.CheckPass; details = fileResult.Print();
+                    id = fileResult.Check.ID; checkPass = fileResult.CheckPass; details = fileResult.Print(); success = fileResult.Success;
                 } else { continue; }
         
                 // Ensure the details populated
@@ -127,7 +128,7 @@ public class CheckCommand : ICommand {
                 if (exceptionIDs.Contains(id)) { continue; }
 
                 // Cache the result of the result
-                Config.WriteElement(configFile, checkName, new XElement("vuln", new XAttribute("ID", id), new XAttribute("CheckPass", checkPass)));
+                Config.WriteElement(configFile, checkName, new XElement("vuln", new XAttribute("ID", id), new XAttribute("CheckPass", checkPass), new XAttribute("ProperlyChecked", success)));
 
                 // Set the output color based on if the check passed
                 if (checkPass == true) { Console.ForegroundColor = ConsoleColor.Green; } else { Console.ForegroundColor = ConsoleColor.Red; }

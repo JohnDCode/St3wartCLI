@@ -166,6 +166,33 @@ public static class RegistryRunner {
         }
         catch (Exception) { return blank; }
     }
+    
+    
+    
+    /// <summary>
+    /// Attempt to remediate a single Registry vuln
+    /// </summary>
+    /// <param name="check">The Registry check to remediate</param>
+    /// <returns>The result of the remediation attempt</returns>
+    private static (string, bool) SecureRegistry(RegistryCheck check) {
+        
+        // Get the ID of the check
+        string id = "";
+        if (check.ID is string temp) { id = temp; } else { return (id, false); }
+        
+        try {
+
+            // Ensure check and value exists in Check and the secure data to set value to exists
+            if (check.Key == null || check.Value == null || check.SecureValue == null) { return (id, false); }
+
+            // Write to the registry
+            Registry.SetValue(check.Key, check.Value, check.SecureValue);
+
+            // Return the result (if nothing has been caught, write successful)
+            return (id, true);
+        }
+        catch (Exception) { return (id, false); }
+    }
 
 
 
@@ -180,6 +207,25 @@ public static class RegistryRunner {
         List<RegistryResult> results = new List<RegistryResult>();
         foreach (RegistryCheck check in checks) {
             results.Add(CheckRegistry(check));
+        }
+
+        // Return the list of results
+        return results;
+    }
+    
+    
+    
+    /// <summary>
+    /// Executes batch Registry remediation attempts
+    /// </summary>
+    /// <param name="checks">The list of Registry checks to remediate</param>
+    /// <returns>The ID and success of the remediation attempt</returns>
+    public static List<(string, bool)> ExecuteRegistrySecure(List<RegistryCheck> checks) {
+
+        // Loop through the checks, perform each, and add the result to the list
+        List<(string, bool)> results = new List<(string, bool)>();
+        foreach (RegistryCheck check in checks) {
+            results.Add(SecureRegistry(check));
         }
 
         // Return the list of results

@@ -39,11 +39,13 @@ public class VulnCommand : ICommand {
             // Set the text color for cool output of the vuln
             Console.ForegroundColor = ConsoleColor.Green;
 
-            // Check the type of the check and print data on the vuln accordingly
+            // Check the type of the check and print data on the vuln accordingly using the overriden methods
             if (vuln is RegistryCheck regCheck) {
                 Console.WriteLine(regCheck.Print());
             } else if (vuln is PowerShellCheck psCheck) {
                 Console.WriteLine(psCheck.Print());
+            } else if (vuln is FileCheck fCheck) {
+                Console.WriteLine(fCheck.Print());
             } else {
                 Errors.PrintError("Unknown check type"); Help();
             }

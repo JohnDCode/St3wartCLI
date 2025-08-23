@@ -87,6 +87,9 @@ public static class DataHandler {
                     case "Registry":
                         check = new RegistryCheck();
                         break;
+                    case "File":
+                        check = new FileCheck();
+                        break;
                     default:
                         // Return an empty, general Check if the type of the Check is unidentified
                         return new Check();

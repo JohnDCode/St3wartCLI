@@ -33,7 +33,7 @@ class Program {
         await Router.Route(args);
     }
 }
-// Implement file checks, add concurrency for all types of checks (Friday) (make anything that utilies a check, check the success field of the returned result object)
+// Implement file checks, add concurrency for all types of checks (Friday) (make anything that utilies a check, check the success field of the returned result object), exists  for registry and file
 // Impleemnt secure command (Friday)
 // Implement schedule command (Saturday)
 // Implement Snap and Restore commands (generate a seperate xml file for those backups, idk how I want this to actually function yet through) (Saturday)

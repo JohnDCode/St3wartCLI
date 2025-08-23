@@ -1,6 +1,6 @@
 [
   {
-    "ID": "OS-001",
+    "ID": "TEST-001",
     "Description": "SMBv1 protocol is enabled",
     
     "CheckType": "PowerShell",
@@ -8,5 +8,28 @@
     "FindData": "Enabled",
     "Operator": "Contains",
     "SecureCommand": "Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol"
+  },
+
+  {
+    "ID": "TEST-002",
+    "Description": "Registry test numerical value",
+
+    "CheckType": "Registry",
+    "Key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Test",
+    "Value": "test",
+    "SecureValue": 9,
+    "FindData": "9",
+    "Operator": "GreaterThan"
+  },
+
+  {
+    "ID": "TEST-003",
+    "Description": "File contains test",
+
+    "CheckType": "File",
+    "Path": "C:/config.xml",
+    "SecureText": "Good Good",
+    "FindData": "Bad Bad",
+    "Operator": "Contains"
   }
 ]

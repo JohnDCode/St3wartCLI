@@ -32,7 +32,7 @@ public class Check {
     /// The operator to perform on the FindData with the output of the system query to get a finding
     /// </summary>
     /// <regards>
-    /// Options for operators are: GreaterThan (numerical data), LessThan (numerical data), EqualTo (numerical or textual data), Contains (numerical or textual data), NotEqualTo (numerical or textual data), NotContains (numerical or textual data)
+    /// Options for operators are: GreaterThan (numerical data), LessThan (numerical data), EqualTo (numerical or textual data), Contains (numerical or textual data), NotEqualTo (numerical or textual data), NotContains (numerical or textual data), Exists (registry values and files), NotExists (registry values and files)
     /// </regards>
     public string? Operator { get; set; }
 

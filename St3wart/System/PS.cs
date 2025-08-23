@@ -533,7 +533,7 @@ public class PowerShellCheck : Check {
     public string? SecureCommand { get; set; }
     
     public override string Print() {
-        return $"Vuln: {this.ID}\nDescription: {this.Description}\nCheck Command: {this.CheckCommand}\nSecure Command: {this.SecureCommand}\nFind Data: {this.FindData}\nOperator: {this.Operator}";
+        return $"Vuln: {this.ID}\nCheck Type: PowerShell\nDescription: {this.Description}\nCheck Command: {this.CheckCommand}\nSecure Command: {this.SecureCommand}\nFind Data: {this.FindData}\nOperator: {this.Operator}";
     }
 }
 

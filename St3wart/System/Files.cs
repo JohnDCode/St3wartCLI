@@ -36,14 +36,29 @@ public static class FileRunner {
         try {
 
             // Ensure the file path exists (if the file path does not exist and the operator is a positive operator, the check passes -->
-                // If text within a file results in a finding, the file not existing results in a non finding and a successful check)
-                
+                // If text within a file results in a finding, the file not existing results in a non finding and a successful check
+            
+            // Also check for Exists and NotExists operators here (crazy logic here)
+            
             if (!File.Exists(check.Path)) {
-                if(check.Operator == "Contains" || check.Operator == "EqualTo") {
+                
+                if (check.Operator == "Exists" || check.Operator == "Contains" || check.Operator == "EqualTo") {
                     blank.CheckPass = true;
+                    blank.Success = true;
+                } else if (check.Operator == "NotExists") {
                     blank.Success = true;
                 }
                 return blank;
+                
+            } else {
+                if (check.Operator == "Exists") {
+                    blank.Success = true;
+                    return blank;
+                } else if (check.Operator == "NotExists") {
+                    blank.CheckPass = true;
+                    blank.Success = true;
+                    return blank;
+                }
             }
 
             // Read the data from the file
@@ -127,7 +142,7 @@ public class FileCheck : Check {
     public string? SecureText { get; set; }
         
     public override string Print() {
-        return $"Vuln: {this.ID}\nDescription: {this.Description}\nPath: {this.Path}\nFind Data: {this.FindData}\nSecure Text: {this.SecureText}";
+        return $"Vuln: {this.ID}\nCheck Type: File\nDescription: {this.Description}\nPath: {this.Path}\nFind Data: {this.FindData}\nSecure Text: {this.SecureText}";
     }
 }
 

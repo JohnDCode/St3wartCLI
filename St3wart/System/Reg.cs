@@ -65,19 +65,55 @@ public static class RegistryRunner {
             // Check that the base key opened
             if (baseRk == null) { return blank; }
 
+            // Stores if the key/value actually exists as a path
+            bool valExists = true;
+
             // Open the subkey
             RegistryKey? subRk = baseRk.OpenSubKey(subKey);
 
-            // Check that the subkey opened
-            if (subRk == null) { return blank; }
+            // Save the value within the subkey
+            object? value = null;
 
-            // Access the value within the subkey
-            var value = subRk.GetValue(check.Value);
-            if (value == null) { return blank; }
+            // Check that the subkey opened and attempt to access value
+            if (subRk == null) { valExists = false; } else {
+                value = subRk.GetValue(check.Value);
 
-            // Close the base and sub key
+                // Close the subkey
+                subRk.Close();
+            }
+
+            // Check if the value was extracted
+            if (value == null) { valExists = false; }
+
+            // Close the base key
             baseRk.Close();
-            subRk.Close();
+            
+
+            // If the registry path does not exist and the operator is a positive operator, the check passes -->
+                // If text within a file results in a finding, the file not existing results in a non finding and a successful check
+            
+            // Also check for Exists and NotExists operators here (crazy logic here)
+            
+            if (!valExists) {
+                
+                if (check.Operator == "Exists" || check.Operator == "Contains" || check.Operator == "EqualTo") {
+                    blank.CheckPass = true;
+                    blank.Success = true;
+                } else if (check.Operator == "NotExists") {
+                    blank.Success = true;
+                }
+                return blank;
+                
+            } else {
+                if (check.Operator == "Exists") {
+                    blank.Success = true;
+                    return blank;
+                } else if (check.Operator == "NotExists") {
+                    blank.CheckPass = true;
+                    blank.Success = true;
+                    return blank;
+                }
+            }
 
             // Define if the check passed or not
             bool checkPass = false;
@@ -174,7 +210,7 @@ public class RegistryCheck : Check {
     public string? SecureValue { get; set; }
         
     public override string Print() {
-        return $"Vuln: {this.ID}\nDescription: {this.Description}\nKey: {this.Key}\nValue: {this.Value}\nFind Data: {this.FindData}\nSecure Value: {this.SecureValue}\nOperator: {this.Operator}";
+        return $"Vuln: {this.ID}\nCheck Type: Registry\nDescription: {this.Description}\nKey: {this.Key}\nValue: {this.Value}\nFind Data: {this.FindData}\nSecure Value: {this.SecureValue}\nOperator: {this.Operator}";
     }
 }
 

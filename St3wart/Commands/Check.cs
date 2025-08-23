@@ -44,14 +44,17 @@ public class CheckCommand : ICommand {
             // Organize checks into lists of their types
             List<PowerShellCheck> psChecks = new List<PowerShellCheck>();
             List<RegistryCheck> regChecks = new List<RegistryCheck>();
+            List<FileCheck> fileChecks = new List<FileCheck>();
             foreach (KeyValuePair<string, Check> check in checks) {
                 if (check.Value is PowerShellCheck psCheck) {
                     psChecks.Add(psCheck);
                 } else if (check.Value is RegistryCheck regCheck) {
                     regChecks.Add(regCheck);
+                } else if (check.Value is FileCheck fileCheck) {
+                    fileChecks.Add(fileCheck);
                 }
             }
-
+            
             // Determine the number of PS instances to spawn (very jank, note: update this)
             int numInstances;
             if (psChecks.Count() < 5) {
@@ -74,11 +77,13 @@ public class CheckCommand : ICommand {
             // Run the two types of checks concurrently
             Task<List<PowerShellResult>> psTask = pool.ExecuteCommandsBatchAsync(psChecks);
             Task<List<RegistryResult>> regTask = Task.Run(() => RegistryRunner.ExecuteRegistryChecks(regChecks));
-            await Task.WhenAll(psTask, regTask);
+            Task<List<FileResult>> fileTask = Task.Run(() => FileRunner.ExecuteFileChecks(fileChecks));
+            await Task.WhenAll(psTask, regTask, fileTask);
 
             // Extract the reuslts of both sets of checks
             List<PowerShellResult> psResults = await psTask;
             List<RegistryResult> regResults = await regTask;
+            List<FileResult> fileResults = await fileTask;
             
             // Get all the exemptions from the XML config file
             List<XElement> exceptions = Config.FetchElements(configFile, "exemptions");
@@ -100,7 +105,7 @@ public class CheckCommand : ICommand {
             
 
             // Display info on both sets of results and log each result
-            List<object> combinedResults = [.. psResults, .. regResults];
+            List<object> combinedResults = [.. psResults, .. regResults, .. fileResults];
             foreach (object objResult in combinedResults) {
 
                 // Get the details of the check
@@ -111,6 +116,8 @@ public class CheckCommand : ICommand {
                     id = psResult.Check.ID; checkPass = psResult.CheckPass; details = psResult.Print();
                 } else if (objResult is RegistryResult regResult) {
                     id = regResult.Check.ID; checkPass = regResult.CheckPass; details = regResult.Print();
+                } else if (objResult is FileResult fileResult) {
+                    id = fileResult.Check.ID; checkPass = fileResult.CheckPass; details = fileResult.Print();
                 } else { continue; }
         
                 // Ensure the details populated
@@ -127,6 +134,7 @@ public class CheckCommand : ICommand {
 
                 // Write the output to the console
                 Console.WriteLine(details);
+                Console.WriteLine("----------------------------------------------");
             }
 
             // Reset the foreground color after printing all of the vulns

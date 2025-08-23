@@ -54,20 +54,29 @@ public class CheckCommand : ICommand {
                     fileChecks.Add(fileCheck);
                 }
             }
+
+            // Allocate resources to PS and File Checks concurrency
+            int psPoolSize;
+            int filePoolSizes;
             
-            // Determine the number of PS instances to spawn (very jank, note: update this)
-            int numInstances;
             if (psChecks.Count() < 5) {
-                numInstances = 1;
+                psPoolSize = 1;
             } else if (psChecks.Count() < 15) {
-                numInstances = 5;
+                psPoolSize = 5;
             } else {
-                numInstances = 10;
+                psPoolSize = 10;
             }
-                
+            
+            if (fileChecks.Count() < 5) {
+                filePoolSizes = 1;
+            } else if (fileChecks.Count() < 15) {
+                filePoolSizes = 5;
+            } else {
+                filePoolSizes = 10;
+            }
 
             // Start the PS pool
-            using var pool = new PowerShellPool(poolSize: 1);
+            using var pool = new PowerShellPool(poolSize: psPoolSize);
             if (!await pool.InitializeAsync()) {
                 Errors.PrintError("Failed to initialize PowerShell pool");
                 Help();
@@ -77,7 +86,7 @@ public class CheckCommand : ICommand {
             // Run the two types of checks concurrently
             Task<List<PowerShellResult>> psTask = pool.ExecuteCommandsBatchAsync(psChecks);
             Task<List<RegistryResult>> regTask = Task.Run(() => RegistryRunner.ExecuteRegistryChecks(regChecks));
-            Task<List<FileResult>> fileTask = FileRunner.ExecuteFileChecks(fileChecks, 1);
+            Task<List<FileResult>> fileTask = FileRunner.ExecuteFileChecks(fileChecks, filePoolSizes);
             await Task.WhenAll(psTask, regTask, fileTask);
 
             // Extract the reuslts of both sets of checks

@@ -1,29 +1,187 @@
 [
   {
     "ID": "TEST-001",
-    "Description": "SMBv1 protocol is enabled",
+    "Description": "Windows Firewall Domain Profile Log Size Configured",
     
     "CheckType": "PowerShell",
-    "CheckCommand": "Get-WindowsOptionalFeature -Online -FeatureName SMB1Protocol | Select-Object -ExpandProperty State",
-    "FindData": "Enabled",
-    "Operator": "Contains",
-    "SecureCommand": "Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol"
+    "CheckCommand": "Get-NetFireWallProfile -Profile Public | Select-Object -ExpandProperty LogMaxSizeKilobytes",
+    "FindData": "5000",
+    "Operator": "GreaterThan",
+    "SecureCommand": "Set-NetFirewallProfile -Profile Public -LogMaxSizeKilobytes 4096"
   },
 
   {
     "ID": "TEST-002",
-    "Description": "Registry test numerical value",
-
-    "CheckType": "Registry",
-    "Key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Test",
-    "Value": "test",
-    "SecureValue": 9,
-    "FindData": "9",
-    "Operator": "GreaterThan"
+    "Description": "Windows Firewall Domain Profile Log Size Configured",
+    
+    "CheckType": "PowerShell",
+    "CheckCommand": "Get-NetFireWallProfile -Profile Public | Select-Object -ExpandProperty LogMaxSizeKilobytes",
+    "FindData": "4000",
+    "Operator": "LessThan",
+    "SecureCommand": "Set-NetFirewallProfile -Profile Public -LogMaxSizeKilobytes 4096"
   },
 
   {
     "ID": "TEST-003",
+    "Description": "Windows Firewall Domain Profile Log Size Configured",
+    
+    "CheckType": "PowerShell",
+    "CheckCommand": "Get-NetFireWallProfile -Profile Public | Select-Object -ExpandProperty LogMaxSizeKilobytes",
+    "FindData": "0",
+    "Operator": "EqualTo",
+    "SecureCommand": "Set-NetFirewallProfile -Profile Public -LogMaxSizeKilobytes 4096"
+  },
+
+  {
+    "ID": "TEST-004",
+    "Description": "Windows Firewall Domain Profile Log Size Configured",
+    
+    "CheckType": "PowerShell",
+    "CheckCommand": "Get-NetFireWallProfile -Profile Public | Select-Object -ExpandProperty LogMaxSizeKilobytes",
+    "FindData": "1",
+    "Operator": "Contains",
+    "SecureCommand": "Set-NetFirewallProfile -Profile Public -LogMaxSizeKilobytes 4096"
+  },
+
+  {
+    "ID": "TEST-005",
+    "Description": "Windows Firewall Domain Profile Log Size Configured",
+    
+    "CheckType": "PowerShell",
+    "CheckCommand": "Get-NetFireWallProfile -Profile Public | Select-Object -ExpandProperty LogMaxSizeKilobytes",
+    "FindData": "4096",
+    "Operator": "NotEqualTo",
+    "SecureCommand": "Set-NetFirewallProfile -Profile Public -LogMaxSizeKilobytes 4096"
+  },
+
+  {
+    "ID": "TEST-006",
+    "Description": "Windows Firewall Domain Profile Log Size Configured",
+    
+    "CheckType": "PowerShell",
+    "CheckCommand": "Get-NetFireWallProfile -Profile Public | Select-Object -ExpandProperty LogMaxSizeKilobytes",
+    "FindData": "4",
+    "Operator": "NotContains",
+    "SecureCommand": "Set-NetFirewallProfile -Profile Public -LogMaxSizeKilobytes 4096"
+  },
+
+
+
+
+
+  {
+    "ID": "TEST-007",
+    "Description": "Windows Update Service Startup Configured",
+
+    "CheckType": "Registry",
+    "Key": "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\wuauserv",
+    "Value": "Start",
+    "SecureValue": 3,
+    "FindData": "3",
+    "Operator": "GreaterThan"
+  },
+
+  {
+    "ID": "TEST-008",
+    "Description": "Windows Update Service Startup Configured",
+
+    "CheckType": "Registry",
+    "Key": "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\wuauserv",
+    "Value": "Start",
+    "SecureValue": 3,
+    "FindData": "3",
+    "Operator": "LessThan"
+  },
+
+  {
+    "ID": "TEST-009",
+    "Description": "Windows Update Service Startup Configured",
+
+    "CheckType": "Registry",
+    "Key": "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\wuauserv",
+    "Value": "Start",
+    "SecureValue": 3,
+    "FindData": "0",
+    "Operator": "EqualTo"
+  },
+
+  {
+    "ID": "TEST-010",
+    "Description": "Windows Update Service Startup Configured",
+
+    "CheckType": "Registry",
+    "Key": "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\wuauserv",
+    "Value": "Start",
+    "SecureValue": 3,
+    "FindData": "4",
+    "Operator": "Contains"
+  },
+
+  {
+    "ID": "TEST-011",
+    "Description": "Windows Update Service Startup Configured",
+
+    "CheckType": "Registry",
+    "Key": "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\wuauserv",
+    "Value": "Start",
+    "SecureValue": 3,
+    "FindData": "3",
+    "Operator": "NotEqualTo"
+  },
+
+  {
+    "ID": "TEST-012",
+    "Description": "Windows Update Service Startup Configured",
+
+    "CheckType": "Registry",
+    "Key": "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\wuauserv",
+    "Value": "Start",
+    "SecureValue": 3,
+    "FindData": "3",
+    "Operator": "NotContains"
+  },
+
+  {
+    "ID": "TEST-013",
+    "Description": "Windows Update Service Startup Configured",
+
+    "CheckType": "Registry",
+    "Key": "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\wuauserv",
+    "Value": "Startxd",
+    "SecureValue": "",
+    "FindData": "",
+    "Operator": "Exists"
+  },
+
+  {
+    "ID": "TEST-014",
+    "Description": "Windows Update Service Startup Configured",
+
+    "CheckType": "Registry",
+    "Key": "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\wuauserv",
+    "Value": "Start",
+    "SecureValue": "",
+    "FindData": "",
+    "Operator": "NotExists"
+  },
+
+
+
+
+
+  {
+    "ID": "TEST-015",
+    "Description": "File contains test",
+
+    "CheckType": "File",
+    "Path": "C:/config.xml",
+    "SecureText": "Good Good",
+    "FindData": "Bad Bad",
+    "Operator": "Contains"
+  },
+
+  {
+    "ID": "TEST-016",
     "Description": "File contains test",
 
     "CheckType": "File",
@@ -32,4 +190,71 @@
     "FindData": "Bad Bad",
     "Operator": "Contains"
   }
+
+  {
+    "ID": "TEST-017",
+    "Description": "File contains test",
+
+    "CheckType": "File",
+    "Path": "C:/config.xml",
+    "SecureText": "Good Good",
+    "FindData": "Bad Bad",
+    "Operator": "Contains"
+  },
+
+  {
+    "ID": "TEST-018",
+    "Description": "File contains test",
+
+    "CheckType": "File",
+    "Path": "C:/config.xml",
+    "SecureText": "Good Good",
+    "FindData": "Bad Bad",
+    "Operator": "Contains"
+  },
+
+  {
+    "ID": "TEST-019",
+    "Description": "File contains test",
+
+    "CheckType": "File",
+    "Path": "C:/config.xml",
+    "SecureText": "Good Good",
+    "FindData": "Bad Bad",
+    "Operator": "Contains"
+  },
+
+  {
+    "ID": "TEST-020",
+    "Description": "File contains test",
+
+    "CheckType": "File",
+    "Path": "C:/config.xml",
+    "SecureText": "Good Good",
+    "FindData": "Bad Bad",
+    "Operator": "Contains"
+  },
+
+  {
+    "ID": "TEST-021",
+    "Description": "File contains test",
+
+    "CheckType": "File",
+    "Path": "C:/config.xml",
+    "SecureText": "Good Good",
+    "FindData": "Bad Bad",
+    "Operator": "Contains"
+  },
+
+  {
+    "ID": "TEST-022",
+    "Description": "File contains test",
+
+    "CheckType": "File",
+    "Path": "C:/config.xml",
+    "SecureText": "Good Good",
+    "FindData": "Bad Bad",
+    "Operator": "Contains"
+  },
+
 ]

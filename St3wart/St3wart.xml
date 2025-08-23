@@ -5,26 +5,54 @@
   </config>
   <logs>
     <checks>
-      <check7f8cdfc82e9f46cabecd3d27d1b6b7bc Date="2025-08-22-20:52:47" File=".\Vulns\System\test.json">
+      <check509aa78e0c394650b3e3d34bb6990ae3 Date="2025-08-22-21:56:46" File=".\Vulns\System\test.json">
         <vuln ID="TEST-001" CheckPass="true" ProperlyChecked="true" />
-        <vuln ID="TEST-002" CheckPass="false" ProperlyChecked="true" />
-        <vuln ID="TEST-003" CheckPass="false" ProperlyChecked="true" />
-      </check7f8cdfc82e9f46cabecd3d27d1b6b7bc>
-      <check56e62fdeff4c4afc85a0d3a5451fb10b Date="2025-08-22-21:17:26" File=".\Vulns\System\test.json">
-        <vuln ID="TEST-001" CheckPass="true" ProperlyChecked="true" />
-        <vuln ID="TEST-002" CheckPass="false" ProperlyChecked="true" />
-        <vuln ID="TEST-003" CheckPass="false" ProperlyChecked="true" />
-      </check56e62fdeff4c4afc85a0d3a5451fb10b>
-      <check78616ff591d545e0ae675d58f63020d5 Date="2025-08-22-21:18:11" File=".\Vulns\System\test.json">
-        <vuln ID="TEST-001" CheckPass="true" ProperlyChecked="true" />
-        <vuln ID="TEST-002" CheckPass="false" ProperlyChecked="true" />
+        <vuln ID="TEST-002" CheckPass="true" ProperlyChecked="true" />
         <vuln ID="TEST-003" CheckPass="true" ProperlyChecked="true" />
-      </check78616ff591d545e0ae675d58f63020d5>
-      <checkeb3d988ce72b43aa9a058320a87409d7 Date="2025-08-22-21:23:24" File=".\Vulns\System\test.json">
+        <vuln ID="TEST-004" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-005" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-006" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-007" CheckPass="false" ProperlyChecked="false" />
+        <vuln ID="TEST-008" CheckPass="false" ProperlyChecked="false" />
+        <vuln ID="TEST-009" CheckPass="false" ProperlyChecked="false" />
+        <vuln ID="TEST-010" CheckPass="false" ProperlyChecked="false" />
+        <vuln ID="TEST-011" CheckPass="false" ProperlyChecked="false" />
+        <vuln ID="TEST-012" CheckPass="false" ProperlyChecked="false" />
+        <vuln ID="TEST-013" CheckPass="false" ProperlyChecked="false" />
+        <vuln ID="TEST-014" CheckPass="false" ProperlyChecked="false" />
+      </check509aa78e0c394650b3e3d34bb6990ae3>
+      <checke876ef57fb8845b9bc8102ba173f86c3 Date="2025-08-22-21:57:47" File=".\Vulns\System\test.json">
         <vuln ID="TEST-001" CheckPass="true" ProperlyChecked="true" />
-        <vuln ID="TEST-002" CheckPass="false" ProperlyChecked="true" />
-        <vuln ID="TEST-003" CheckPass="false" ProperlyChecked="true" />
-      </checkeb3d988ce72b43aa9a058320a87409d7>
+        <vuln ID="TEST-002" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-003" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-004" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-005" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-006" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-007" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-008" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-009" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-010" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-011" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-012" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-013" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-014" CheckPass="true" ProperlyChecked="true" />
+      </checke876ef57fb8845b9bc8102ba173f86c3>
+      <check2468f4c8802b4e9db28bf5e941fdd7ac Date="2025-08-22-21:58:34" File=".\Vulns\System\test.json">
+        <vuln ID="TEST-001" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-002" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-003" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-004" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-005" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-006" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-007" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-008" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-009" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-010" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-011" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-012" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-013" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-014" CheckPass="true" ProperlyChecked="true" />
+      </check2468f4c8802b4e9db28bf5e941fdd7ac>
     </checks>
   </logs>
 </st3wart>

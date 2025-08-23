@@ -33,7 +33,7 @@ public class CheckCommand : ICommand {
 
             // The path to the config file
             string configFile = Directory.GetCurrentDirectory() + "/St3wart.xml";
-            if (!File.Exists(filePath)) { Errors.PrintError("Unable to find configuration file"); Help(); return; }
+            if (!File.Exists(configFile)) { Errors.PrintError("Unable to find configuration file"); Help(); return; }
             
             // Get all vulns from the file
             Dictionary<string, Check> checks = DataHandler.VulnsFromFile(filePath);
@@ -84,7 +84,7 @@ public class CheckCommand : ICommand {
             }
 
             // Run the two types of checks concurrently
-            Task<List<PowerShellResult>> psTask = pool.ExecuteCommandsBatchAsync(psChecks);
+            Task<List<PowerShellResult>> psTask = pool.ExecuteChecksBatchAsync(psChecks);
             Task<List<RegistryResult>> regTask = Task.Run(() => RegistryRunner.ExecuteRegistryChecks(regChecks));
             Task<List<FileResult>> fileTask = FileRunner.ExecuteFileChecks(fileChecks, filePoolSizes);
             await Task.WhenAll(psTask, regTask, fileTask);
@@ -149,6 +149,10 @@ public class CheckCommand : ICommand {
 
             // Reset the foreground color after printing all of the vulns
             Console.ResetColor();
+
+
+            // Output the GUID of the check
+            Console.WriteLine($"Completed check ID {checkName.Substring(5)}");
 
         } catch {
             Errors.PrintError("Error");

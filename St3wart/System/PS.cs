@@ -118,7 +118,7 @@ public class PowerShellInstance : IDisposable {
     /// <returns>
     /// The output and details of the check as a PowerShellResult object
     /// </returns>
-    public async Task<PowerShellResult> ExecuteCommandAsync(PowerShellCheck check, int timeoutMs = 30000) {
+    public async Task<PowerShellResult> ExecuteCheckAsync(PowerShellCheck check, int timeoutMs = 30000) {
 
         // Ensure the process resources have not been disposed of
         if (_disposed) throw new ObjectDisposedException(nameof(PowerShellInstance));
@@ -238,6 +238,73 @@ public class PowerShellInstance : IDisposable {
     }
 
 
+
+    /// <summary>
+    /// Attempt to remediate a single vulnerability using PowerShell
+    /// </summary>
+    /// <param name="check">The PowerShell check to secure</param>
+    /// <param name="timeoutMs">The timeout (in ms) allotted for the command to run</param>
+    /// <returns>
+    /// The success and ID of the remediation attempt
+    /// </returns>
+    public async Task<(string, bool)> ExecuteSecureAsync(PowerShellCheck check, int timeoutMs = 30000) {
+
+        // Ensure the process resources have not been disposed of
+        if (_disposed) throw new ObjectDisposedException(nameof(PowerShellInstance));
+
+        // Wait to enter the semaphore slim
+        await _semaphore.WaitAsync();
+        try {
+
+            // Handle cancellation state for the command
+            using var cts = new CancellationTokenSource(timeoutMs);
+
+            // Send command
+            await _inputWriter!.WriteLineAsync(check.SecureCommand);
+            await _inputWriter.WriteLineAsync($"Write-Output $delimiter");
+            await _inputWriter.FlushAsync();
+
+            // Build the output and error strings from the general output stream
+            var errors = new List<string>();
+
+            // Get the ID of the check
+            string id = "";
+            if (check.ID is string temp) { id = temp; } else { return (id, false); }
+
+            // Ensure streams populated
+            if (_outputReader == null || _errorReader == null) { return (id, false); }
+
+            try {
+                
+                // Read error stream until cancellation object cancels operation OR we reach 5 error lines (to save resources)
+                for (int i = 0; i < 5 && !cts.Token.IsCancellationRequested; i++) {
+
+                    // Read the next line
+                    var line = await ReadLineWithTimeoutAsync(_errorReader, cts.Token, true);
+
+                    // If the line is empty or the delimeter is reached, stop reading
+                    if (line == null) break;
+                    if (line == _delimiter) break;
+
+                    // Log general output stream to output list
+                    errors.Add(line);
+                }
+
+                // Return if the remediation was successful or not based on errors from PS SecureCommand
+                return (id, errors.Count == 0);
+            }
+
+            // If the check failed, return blank result
+            catch (Exception) { return (id, false); }
+        }
+
+        finally {
+            // Release semaphore slim so next command can enter
+            _semaphore.Release();
+        }
+    }
+    
+    
 
     /// <summary>
     /// Read the next line of a particular data stream
@@ -426,14 +493,14 @@ public class PowerShellPool : IDisposable {
 
 
     /// <summary>
-    /// Dispatch a single PowerShell check to the next available PowerShell instance
+    /// Dispatch a single PowerShell check to the next available PowerShell instance to check for vuln
     /// </summary>
     /// <param name="check">The PowerShell check to execute and check</param>
     /// <param name="timeoutMs">The timeout (in ms) allotted for the command to run</param>
     /// <returns>
     /// The output and details of the check as a PowerShellResult object
     /// </returns>
-    public async Task<PowerShellResult> ExecuteCommandAsync(PowerShellCheck check, int timeoutMs = 30000) {
+    public async Task<PowerShellResult> ExecuteCheckAsync(PowerShellCheck check, int timeoutMs = 30000) {
 
         // If the pool resources have been disposed/released, can not execute command
         if (_disposed) { throw new ObjectDisposedException(nameof(PowerShellPool)); }
@@ -446,7 +513,7 @@ public class PowerShellPool : IDisposable {
             if (_availableInstances.TryDequeue(out var instance)) {
 
                 // Execute the command using the PowerShell instance and return the output
-                try { return await instance.ExecuteCommandAsync(check, timeoutMs); }
+                try { return await instance.ExecuteCheckAsync(check, timeoutMs); }
 
                 // Requeue the PowerShell instance to be used again
                 finally { _availableInstances.Enqueue(instance); }
@@ -461,6 +528,43 @@ public class PowerShellPool : IDisposable {
     }
 
 
+    
+    /// <summary>
+    /// Dispatch a single PowerShell check to the next available PowerShell instance for remediation
+    /// </summary>
+    /// <param name="check">The PowerShell check to secure</param>
+    /// <param name="timeoutMs">The timeout (in ms) allotted for the command to run</param>
+    /// <returns>
+    /// The ID and success of the PowerShell remediation attempt
+    /// </returns>
+    public async Task<(string, bool)> ExecuteSecureAsync(PowerShellCheck check, int timeoutMs = 30000) {
+
+        // If the pool resources have been disposed/released, can not execute command
+        if (_disposed) { throw new ObjectDisposedException(nameof(PowerShellPool)); }
+
+        // Wait in queue to enter the Sempahore Slim
+        await _semaphore.WaitAsync();
+
+        try {
+            // Attempt to remove and then utilize the available PowerShell instance at the top of the queue
+            if (_availableInstances.TryDequeue(out var instance)) {
+
+                // Execute the command using the PowerShell instance and return the output
+                try { return await instance.ExecuteSecureAsync(check, timeoutMs); }
+
+                // Requeue the PowerShell instance to be used again
+                finally { _availableInstances.Enqueue(instance); }
+            }
+
+            // Throw if can not remove any available instance of the top of the stack
+            else { throw new InvalidOperationException("No PowerShell instance available"); }
+        }
+
+        // Release the Semaphore to move to the next command
+        finally { _semaphore.Release(); }
+    }
+    
+    
 
     /// <summary>
     /// Dispatch multiple PowerShell checks to all maintained PowerShell instances within the pool
@@ -468,7 +572,7 @@ public class PowerShellPool : IDisposable {
     /// <param name="checks">The list of PowerShell checks to execute and check for findings</param>
     /// <param name="maxConcurrency">The number of checks that can run at once within this batch</param>
     /// <param name="timeoutMs">The timeout (in ms) allotted for the command for the check to run</param>
-    public async Task<List<PowerShellResult>> ExecuteCommandsBatchAsync(List<PowerShellCheck> checks, int maxConcurrency = -1, int timeoutMs = 30000) {
+    public async Task<List<PowerShellResult>> ExecuteChecksBatchAsync(List<PowerShellCheck> checks, int maxConcurrency = -1, int timeoutMs = 30000) {
 
         // If set to -1, then just set the Semaphore Slim to use all available resources
         if (maxConcurrency == -1) maxConcurrency = _poolSize;
@@ -483,7 +587,41 @@ public class PowerShellPool : IDisposable {
             await semaphore.WaitAsync();
             try {
                 // Extract the output of the singular command
-                return await ExecuteCommandAsync(check, timeoutMs);
+                return await ExecuteCheckAsync(check, timeoutMs);
+            }
+
+            // Release the Semaphore and allow it to move to the next task
+            finally { semaphore.Release(); }
+        });
+
+        // Return the outputs of the commands (individual tasks) as a list
+        return (await Task.WhenAll(tasks)).ToList();
+    }
+    
+    
+    
+    /// <summary>
+    /// Dispatch multiple PowerShell remediation attempts to all maintained PowerShell instances within the pool
+    /// </summary>
+    /// <param name="checks">The list of PowerShell checks to remediate</param>
+    /// <param name="maxConcurrency">The number of checks that can run at once within this batch</param>
+    /// <param name="timeoutMs">The timeout (in ms) allotted for the command for the check to run</param>
+    public async Task<List<(string, bool)>> ExecuteSecureBatchAsync(List<PowerShellCheck> checks, int maxConcurrency = -1, int timeoutMs = 30000) {
+
+        // If set to -1, then just set the Semaphore Slim to use all available resources
+        if (maxConcurrency == -1) maxConcurrency = _poolSize;
+
+        // Start the Semaphore to handle the batch
+        var semaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
+
+        // Add all tasks to the Semaphore
+        var tasks = checks.Select(async check => {
+
+            // Enter the Semaphore
+            await semaphore.WaitAsync();
+            try {
+                // Extract the output of the singular command
+                return await ExecuteSecureAsync(check, timeoutMs);
             }
 
             // Release the Semaphore and allow it to move to the next task

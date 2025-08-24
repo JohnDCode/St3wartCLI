@@ -139,6 +139,7 @@ public static class FileRunner {
 
             // If just typical check, just replace the insecure data with secure data
             } else {
+                // Get the file data
                 string? data = File.ReadAllText(check.Path);
                 
                 // Ensure data from file and data to compare to populated

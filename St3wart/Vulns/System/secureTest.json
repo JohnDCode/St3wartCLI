@@ -1,0 +1,37 @@
+[
+
+  {
+    "ID": "TEST-002",
+    "Description": "Windows Firewall Domain Profile Log Size Configured",
+    
+    "CheckType": "PowerShell",
+    "CheckCommand": "Get-NetFireWallProfile -Profile Public | Select-Object -ExpandProperty LogMaxSizeKilobytes",
+    "FindData": "4096",
+    "Operator": "LessThan",
+    "SecureCommand": "Set-NetFirewallProfile -Profile Public -LogMaxSizeKilobytes 4096"
+  },
+
+  {
+    "ID": "TEST-011",
+    "Description": "Windows Update Service Startup Configured",
+
+    "CheckType": "Registry",
+    "Key": "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\wuauserv",
+    "Value": "Start",
+    "SecureValue": 3,
+    "FindData": "3",
+    "Operator": "NotEqualTo"
+  },
+
+  {
+    "ID": "TEST-018",
+    "Description": "SSH Server Config File Disallows Empty Passwords",
+
+    "CheckType": "File",
+    "Path": "C:/ProgramData/ssh/sshd_config",
+    "SecureText": "PermitEmptyPasswords no",
+    "FindData": "PermitEmptyPasswords yes",
+    "Operator": "Contains"
+  }
+
+]

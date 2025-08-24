@@ -29,7 +29,7 @@ public static class Config {
         
         try {
             // Create (with default St3wart config layout) and save the configuration file
-            var doc = new XDocument(new XElement("st3wart", new XElement("config", new XElement("exemptions")), new XElement("logs", new XElement("checks"))));
+            var doc = new XDocument(new XElement("st3wart", new XElement("config", new XElement("exemptions")), new XElement("logs", new XElement("checks"), new XElement("secures"))));
             doc.Save(filePath);
         } catch {
             return false;

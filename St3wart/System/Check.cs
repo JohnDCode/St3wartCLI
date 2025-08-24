@@ -41,6 +41,6 @@ public class Check {
     /// </summary>
     /// <returns>A formatted string with the check data</returns>
     public virtual string Print() {
-        return $"Vuln: {this.ID}\nDescription: {this.Description}";
+        return $"ID: {this.ID}\nDescription: {this.Description}";
     }
 }

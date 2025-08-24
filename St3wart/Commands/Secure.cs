@@ -73,10 +73,84 @@ public class SecureCommand : ICommand {
                     fileChecks.Add(fileCheck);
                 }
             }
+
+            // Allocate resources to PS and File remediation processes concurrency
+            int psPoolSize;
+            int filePoolSizes;
             
-            // SDFDSF --> NOW WE HAVE ALL THE FAILED CHECKS, REMEDIATE THEM HERE
+            if (psChecks.Count() < 5) {
+                psPoolSize = 1;
+            } else if (psChecks.Count() < 15) {
+                psPoolSize = 5;
+            } else {
+                psPoolSize = 10;
+            }
             
+            if (fileChecks.Count() < 5) {
+                filePoolSizes = 1;
+            } else if (fileChecks.Count() < 15) {
+                filePoolSizes = 5;
+            } else {
+                filePoolSizes = 10;
+            }
+
+            // Start the PS pool
+            using var pool = new PowerShellPool(poolSize: psPoolSize);
+            if (!await pool.InitializeAsync()) {
+                Errors.PrintError("Failed to initialize PowerShell pool");
+                Help();
+                return;
+            }
             
+           // Run the three types of secure procedures concurrently
+            Task<List<(string, bool)>> psTask = pool.ExecuteSecureBatchAsync(psChecks);
+            Task<List<(string, bool)>> regTask = Task.Run(() => RegistryRunner.ExecuteRegistrySecure(regChecks));
+            Task<List<(string, bool)>> fileTask = FileRunner.ExecuteFileSecure(fileChecks, filePoolSizes);
+            await Task.WhenAll(psTask, regTask, fileTask);
+
+            // Extract the reuslts of both sets of checks
+            List<(string, bool)> psResults = await psTask;
+            List<(string, bool)> regResults = await regTask;
+            List<(string, bool)> fileResults = await fileTask;
+            
+            // Get the date to log the secure
+            DateTime currentTime = DateTime.Now;
+            string formattedDateTime = currentTime.ToString("yyyy-MM-dd-HH:mm:ss");
+
+            // Log the secure
+            string secureName = $"secure{args[2]}";
+            Config.WriteElement(configFile, "secures", new XElement(secureName, new XAttribute("Date", formattedDateTime), new XAttribute("File", args[1])));
+            
+
+            // Display info on all three sets of results and log each remediation result
+            List<(string, bool)> combinedResults = [.. psResults, .. regResults, .. fileResults];
+            foreach ((string, bool) result in combinedResults) {
+
+                // Lookup the check that corresponds to the current result
+                Check checkResult = checks[result.Item1];
+
+                string details = checkResult.Print() + $"\nRemediation Success: {result.Item2}";
+        
+                // Ensure the details populated
+                if ( details == null) { continue; }
+
+                // Cache the result of the result
+                Config.WriteElement(configFile, secureName, new XElement("remediation", new XAttribute("ID", result.Item1), new XAttribute("ProperlyRemediated", result.Item2)));
+
+                // Set the output color based on if the check passed
+                if (result.Item2 == true) { Console.ForegroundColor = ConsoleColor.Green; } else { Console.ForegroundColor = ConsoleColor.Red; }
+
+                // Write the output to the console
+                Console.WriteLine(details);
+                Console.WriteLine("----------------------------------------------");
+            }
+
+            // Reset the foreground color after printing all of the vulns
+            Console.ResetColor();
+
+
+            // Output the GUID of the check
+            Console.WriteLine($"Secured check ID {checkName.Substring(5)}");
             
         }
         catch {

@@ -39,7 +39,7 @@ public class CheckCommand : ICommand {
             Dictionary<string, Check> checks = DataHandler.VulnsFromFile(filePath);
 
             // Ensure checks populated
-            if (checks == null) { Errors.PrintError("Can not retrieve vulns from JSON database");Help(); return; }
+            if (checks == null || checks.Count() == 0) { Errors.PrintError("Can not retrieve vulns from JSON database");Help(); return; }
             
             // Organize checks into lists of their types
             List<PowerShellCheck> psChecks = new List<PowerShellCheck>();
@@ -83,7 +83,7 @@ public class CheckCommand : ICommand {
                 return;
             }
 
-            // Run the two types of checks concurrently
+            // Run the three types of checks concurrently
             Task<List<PowerShellResult>> psTask = pool.ExecuteChecksBatchAsync(psChecks);
             Task<List<RegistryResult>> regTask = Task.Run(() => RegistryRunner.ExecuteRegistryChecks(regChecks));
             Task<List<FileResult>> fileTask = FileRunner.ExecuteFileChecks(fileChecks, filePoolSizes);
@@ -113,7 +113,7 @@ public class CheckCommand : ICommand {
             Config.WriteElement(configFile, "checks", new XElement(checkName, new XAttribute("Date", formattedDateTime), new XAttribute("File", args[1])));
             
 
-            // Display info on both sets of results and log each result
+            // Display info on all three sets of results and log each result
             List<object> combinedResults = [.. psResults, .. regResults, .. fileResults];
             foreach (object objResult in combinedResults) {
 

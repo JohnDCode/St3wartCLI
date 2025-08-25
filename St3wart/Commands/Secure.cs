@@ -170,7 +170,7 @@ public class SecureCommand : ICommand {
         Console.WriteLine("St3wart Secure");
         Console.WriteLine("Remediates findings from previous check");
         Console.WriteLine("Usage: St3wart.exe secure [OPTIONS] <JSON BANK PATH> <CHECK GUID>");
-        Console.WriteLine("Example: St3wart.exe secure aa2120aadb464c6fb9c1f4ec6a7806bf C:/vulns.json");
+        Console.WriteLine("Example: St3wart.exe secure C:/vulns.json abcdefghijklmnopqrstuvwxyz012345");
         Console.ResetColor();
     }
 }

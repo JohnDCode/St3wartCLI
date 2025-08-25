@@ -8,7 +8,7 @@ JohnDavid Abe
 
 
 
-// Packages
+// Namespaces
 using System.Data.Common;
 using System.Runtime.Versioning;
 

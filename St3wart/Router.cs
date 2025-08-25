@@ -8,7 +8,7 @@ JohnDavid Abe
 
 
 
-// Packages
+// Namespaces
 using System.Runtime.Versioning;
 
 
@@ -44,6 +44,7 @@ public static class Router {
         ICommand? cmd = command switch {
             "check" => new CheckCommand(),
             "exempt" => new ExemptCommand(),
+            "help" => new HelpCommand(),
             "report" => new ReportCommand(),
             "schedule" => new ScheduleCommand(),
             "secure" => new SecureCommand(),

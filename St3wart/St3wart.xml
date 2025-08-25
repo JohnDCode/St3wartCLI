@@ -5,16 +5,57 @@
   </config>
   <logs>
     <checks>
-      <check70a83927a8274ab2bc29c0afd33b5416 Date="2025-08-23-21:59:36" File=".\Vulns\System\secureTest.json">
+      <checkc2fa1948fae846e980d46f5f6bcd708c Date="2025-08-25-02:21:47" File=".\Vulns\System\test.json">
+        <vuln ID="TEST-001" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-003" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-004" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-005" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-006" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-007" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-008" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-009" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-010" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-011" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-012" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-013" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-014" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-015" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-016" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-017" CheckPass="false" ProperlyChecked="true" />
+        <vuln ID="TEST-018" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-019" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-020" CheckPass="true" ProperlyChecked="true" />
+      </checkc2fa1948fae846e980d46f5f6bcd708c>
+      <checked443f22d3014f93b03da4b63e6a81a7 Date="2025-08-25-02:22:09" File=".\Vulns\System\secureTest.json">
+        <vuln ID="TEST-011" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-018" CheckPass="true" ProperlyChecked="true" />
+      </checked443f22d3014f93b03da4b63e6a81a7>
+      <check475e01033d0446098697005e94db6031 Date="2025-08-25-02:22:44" File=".\Vulns\System\secureTest.json">
+        <vuln ID="TEST-011" CheckPass="false" ProperlyChecked="true" />
+        <vuln ID="TEST-018" CheckPass="true" ProperlyChecked="true" />
+      </check475e01033d0446098697005e94db6031>
+      <check5c042525702149c5b2b16755986acb81 Date="2025-08-25-02:24:52" File=".\Vulns\System\secureTest.json">
+        <vuln ID="TEST-011" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-018" CheckPass="true" ProperlyChecked="true" />
+      </check5c042525702149c5b2b16755986acb81>
+      <check626fed7d55dd4ab9a105304de2d425e9 Date="2025-08-25-02:25:31" File=".\Vulns\System\secureTest.json">
+        <vuln ID="TEST-002" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-011" CheckPass="true" ProperlyChecked="true" />
+        <vuln ID="TEST-018" CheckPass="true" ProperlyChecked="true" />
+      </check626fed7d55dd4ab9a105304de2d425e9>
+      <check158524f190bc43da94197ae3fbfa12b5 Date="2025-08-25-02:27:07" File=".\Vulns\System\secureTest.json">
         <vuln ID="TEST-002" CheckPass="false" ProperlyChecked="true" />
         <vuln ID="TEST-011" CheckPass="true" ProperlyChecked="true" />
         <vuln ID="TEST-018" CheckPass="true" ProperlyChecked="true" />
-      </check70a83927a8274ab2bc29c0afd33b5416>
+      </check158524f190bc43da94197ae3fbfa12b5>
     </checks>
     <secures>
-      <secure70a83927a8274ab2bc29c0afd33b5416 Date="2025-08-23-21:59:59" File=".\Vulns\System\secureTest.json">
+      <secure475e01033d0446098697005e94db6031 Date="2025-08-25-02:23:23" File=".\Vulns\System\secureTest.json">
+        <remediation ID="TEST-011" ProperlyRemediated="true" />
+      </secure475e01033d0446098697005e94db6031>
+      <secure158524f190bc43da94197ae3fbfa12b5 Date="2025-08-25-02:27:49" File=".\Vulns\System\secureTest.json">
         <remediation ID="TEST-002" ProperlyRemediated="true" />
-      </secure70a83927a8274ab2bc29c0afd33b5416>
+      </secure158524f190bc43da94197ae3fbfa12b5>
     </secures>
   </logs>
 </st3wart>

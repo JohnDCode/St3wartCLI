@@ -8,7 +8,7 @@ JohnDavid Abe
 
 
 
-// Packages
+// Namespaces
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 

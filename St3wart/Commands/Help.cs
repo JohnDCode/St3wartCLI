@@ -24,10 +24,8 @@ public class HelpCommand : ICommand
         Console.WriteLine(" exempt");
         Console.WriteLine(" help");
         Console.WriteLine(" report");
-        Console.WriteLine(" restore");
         Console.WriteLine(" schedule");
         Console.WriteLine(" secure");
-        Console.WriteLine(" snap");
         Console.WriteLine(" vuln");
         Console.ResetColor();
     }

@@ -45,10 +45,8 @@ public static class Router {
             "check" => new CheckCommand(),
             "exempt" => new ExemptCommand(),
             "report" => new ReportCommand(),
-            "restore" => new RestoreCommand(),
             "schedule" => new ScheduleCommand(),
             "secure" => new SecureCommand(),
-            "snap" => new SnapCommand(),
             "vuln" => new VulnCommand(),
             _ => null
         };

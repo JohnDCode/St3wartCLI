@@ -2,7 +2,7 @@
 
 Stewart CLI
 /Program.cs - Entry point for executable
-JohnDavid Abe 
+JohnDavid Abe
 
 */
 
@@ -34,7 +34,7 @@ class Program {
     }
 }
 
-// Impleemnt secure command (Friday)
+
 // Implement schedule command (Saturday)
 // Implement Snap and Restore commands (generate a seperate xml file for those backups, idk how I want this to actually function yet through) (Saturday)
 // Implement report command (Saturday)

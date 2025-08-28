@@ -1,7 +1,7 @@
 /*
 
 Stewart CLI
-/Config/Config.cs - Handles the configuration file for configuring the CLI tool 
+/Config/Config.cs - Handles the configuration file for configuring the CLI tool
 JohnDavid Abe 
 
 */

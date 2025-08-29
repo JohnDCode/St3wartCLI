@@ -3,7 +3,7 @@
 
 <p>
 <img src="https://img.shields.io/badge/Language-PowerShell-blue" alt="PowerShell">
-<img src="https://img.shields.io/github/license/johndcode/St3wart-CLI" alt="License">
+<img src="https://img.shields.io/github/license/johndcode/St3wartCLI" alt="License">
 </p>
 
 ---

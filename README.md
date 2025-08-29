@@ -1,9 +1,9 @@
 <h1>🛡️ St3wart CLI</h1>
 <h3>A Cross-Platform Windows Security Management Tool</h3>
 
-<p align="center">
+<p>
 <img src="https://img.shields.io/badge/Language-PowerShell-blue" alt="PowerShell">
-<img src="https://img.shields.io/github/license/johndcode/St3wart" alt="License">
+<img src="https://img.shields.io/github/license/johndcode/St3wart-CLI" alt="License">
 </p>
 
 ---

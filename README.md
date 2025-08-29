@@ -12,10 +12,10 @@
 St3wart is a **lightweight, configurable Windows security management tool**.  
 Administrators can define security checks via JSON and automate policy enforcement, vulnerability reporting, and remediation.  
 
-🚀 Latest version (`v0.1`) includes:  
-- ✅ Check and remediate **PowerShell, Registry, and File-based vulnerabilities**  
-- ✅ Generate actionable **reports**  
-- ✅ Schedule periodic security checks
+Latest version (`v0.1`) includes:  
+- Check and remediate **PowerShell, Registry, and File-based vulnerabilities**  
+- Generate actionable **reports**  
+- Schedule periodic security checks
 
 For the development story and a detailed writeup, check out the blog post here:  
 [A look at my Windows desktop and server vulnerability management tool](https://www.johndcode.com/posts/St3wart/)  
